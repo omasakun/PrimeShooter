@@ -1,0 +1,16 @@
+{
+    "compilerOptions": {
+        "module": "commonjs",
+		"target": "es2015",
+        "removeComments": true,
+        "preserveConstEnums": true,
+        "sourceMap": false
+    },
+    "files": [
+        "index.ts"
+    ],
+		"exclude": [
+			"素数シューティング/",
+			"index.js"
+		]
+}
