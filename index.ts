@@ -1,16 +1,12 @@
+//TODO: Help-素数色分け機能
 namespace Polyfill {
-	const Funcs: (() => void)[] = [
-		() => {
-			let timer: number = undefined;
-			let polyfill = function (callback: any): any {
-				if (typeof timer == "number") clearTimeout(timer);
-				timer = setTimeout(callback, 1000 / 60);
-			};
-			window.requestAnimationFrame = window.requestAnimationFrame || window.webkitRequestAnimationFrame || polyfill;
-		}
-	];
 	export function Do() {
-		Funcs.forEach((v => v()));
+		let timer: number = undefined;
+		let polyfill = function (callback: any): any {
+			if (typeof timer == "number") clearTimeout(timer);
+			timer = setTimeout(callback, 1000 / 60);
+		};
+		window.requestAnimationFrame = window.requestAnimationFrame || window.webkitRequestAnimationFrame || polyfill;
 	}
 }
 function GetTime(): number {
@@ -90,17 +86,17 @@ class ResizingCanvas {
 		this.ctx.lineTo(pxX + pxR, pxY);
 		this.ctx.quadraticCurveTo(pxX, pxY, pxX, pxY + pxR);
 	}
-	TextCenter(Text: string, x: number, y: number, w: number, h: number) {
+	TextCenter(Text: string, x: number, y: number, w: number) {
 		this.ctx.textAlign = "center";
 		this.ctx.textBaseline = "middle";
 		this.ctx.fillText(Text, this.S(x), this.S(y), this.S(w));
 	}
-	TextLeft(Text: string, x: number, y: number, w: number, h: number) {
+	TextLeft(Text: string, x: number, y: number, w: number) {
 		this.ctx.textAlign = "left";
 		this.ctx.textBaseline = "middle";
 		this.ctx.fillText(Text, this.S(x), this.S(y), this.S(w));
 	}
-	TextRight(Text: string, x: number, y: number, w: number, h: number) {
+	TextRight(Text: string, x: number, y: number, w: number) {
 		this.ctx.textAlign = "right";
 		this.ctx.textBaseline = "middle";
 		this.ctx.fillText(Text, this.S(x), this.S(y), this.S(w));
@@ -114,6 +110,7 @@ class ResizingCanvas {
 }
 interface Elm {
 	Name: string
+	Enabled: boolean
 	Init?(...Args: any[]): void
 	BeforeDraw?(Elms: Elm[], Span: number): void
 	Draw?(c: ResizingCanvas, Span: number): void
@@ -121,6 +118,7 @@ interface Elm {
 }
 class BackDrawer implements Elm {
 	Name = "Back";
+	Enabled = true;
 	Draw(c: ResizingCanvas, Span: number) {
 		c.ctx.fillStyle = "#CCC";//const
 		c.ctx.strokeStyle = "#333";//const
@@ -130,20 +128,21 @@ class BackDrawer implements Elm {
 		}
 		c.ctx.fillStyle = "#333";//const
 		c.ctx.font = `${c.S(Game.Hcell - 4) << 0}px ${Game.FontName}`;
-		c.TextLeft("Life:  " + Game.life.toString(), 0.5/*const*/ * Game.Wcell, Game.Hcell * (Game.Hcount - 2 + 0.5), Game.Wcell * Game.Wcount / 2, Game.Hcell);
-		c.TextLeft("Score: " + Game.score.toString(), 0.5/*const*/ * Game.Wcell, Game.Hcell * (Game.Hcount - 1 + 0.5), Game.Wcell * Game.Wcount / 2, Game.Hcell);
-		c.TextRight("Hint: " + Game.hintCount.toString(), (Game.Wcount - 0.5/*const*/) * Game.Wcell, Game.Hcell * (Game.Hcount - 1 + 0.5), Game.Wcell * Game.Wcount / 2, Game.Hcell);
+		c.TextLeft("Life:  " + Game.life.toString(), 0.5/*const*/ * Game.Wcell, Game.Hcell * (Game.Hcount - 2 + 0.5), Game.Wcell * Game.Wcount / 2);
+		c.TextLeft("Score: " + Game.score.toString(), 0.5/*const*/ * Game.Wcell, Game.Hcell * (Game.Hcount - 1 + 0.5), Game.Wcell * Game.Wcount / 2);
+		c.TextRight("Hint: " + Game.hintCount.toString(), (Game.Wcount - 0.5/*const*/) * Game.Wcell, Game.Hcell * (Game.Hcount - 1 + 0.5), Game.Wcell * Game.Wcount / 2);
 		let lvText = (Game.level % NumNodes.LevelToMaxWeighting == 0 ? (Game.level / NumNodes.LevelToMaxWeighting).toString() : Game.level.toString() + "÷" + NumNodes.LevelToMaxWeighting.toString());
-		c.TextRight("Lv." + lvText, (Game.Wcount - 0.5/*const*/) * Game.Wcell, Game.Hcell * (Game.Hcount - 2 + 0.5), Game.Wcell * Game.Wcount / 2, Game.Hcell);
+		c.TextRight("Lv." + lvText, (Game.Wcount - 0.5/*const*/) * Game.Wcell, Game.Hcell * (Game.Hcount - 2 + 0.5), Game.Wcell * Game.Wcount / 2);
 	}
 }//Name:Back
 class Dropper implements Elm {
 	Name = "Dropper";
-	private dx = -2;//per 1sec
+	Enabled = true;
+	private dx = -3;//const per 1sec
 	private x = ((Game.Wcount - 1) / 2) << 0;
 	BeforeDraw(Elms: Elm[], Span: number) {
-		const TurnProbability = 0.2;
-		const DropProbability = 0.5;
+		const TurnProbability = 0.4;
+		const DropProbability = 0.2;
 		if ((this.x << 0) != (this.x + this.dx * Span / 1000) << 0) {
 			this.x = (this.x + this.dx * Span / 1000);
 			if (Math.random() < TurnProbability)
@@ -169,9 +168,10 @@ class Dropper implements Elm {
 }//Name: Dropper
 class Shooter implements Elm {
 	Name = "Shooter";
-	private Keymap = [37, 39, 38];//CONST
-	private KeySleepMax1 = [6, 6, 9]; //CONST
-	private KeySleepMax2 = [3, 3, 6]; //CONST
+	Enabled = true;
+	private Keymap = [37, 39, 38, 72];//CONST Left Right Shot Help
+	private KeySleepMax1 = [9, 9, 9, Infinity]; //CONST
+	private KeySleepMax2 = [6, 6, 3, Infinity]; //CONST
 	private KeyMode = [0, 0, 0]//0:Not pressed 1+:pressed tick count
 	private dx = 0;//per tick
 	private x = ((Game.Wcount - 1) / 2) << 0;
@@ -209,6 +209,8 @@ class Shooter implements Elm {
 					case 2://Shot
 						Elms.find((v) => v.Name == "Shots").Add(Math.round(this.x + Game.Wcell) % Game.Wcell, this.y);
 						break;
+					case 3:
+						Elms.find((v) => v.Name == "NumNodes").Hint();
 				}
 			}
 		}, this);
@@ -249,10 +251,14 @@ class Shooter implements Elm {
 }//Name; Shooter
 class Shots implements Elm {
 	Name = "Shots";
+	Enabled = true;
 	shots: [number, number][] = [];
 	static Radius = 0.2;//const
 	Add(x: number, y: number) {
 		this.shots.push([x, y]);
+	}
+	Clear() {
+		this.shots = [];
 	}
 	Draw(c: ResizingCanvas, Span: number) {
 		c.ctx.fillStyle = "#EEE";//const
@@ -260,7 +266,7 @@ class Shots implements Elm {
 		c.Shadow();
 		c.ctx.beginPath();
 		this.shots.forEach((v) => {
-			v[1] -= 0.1;//const
+			v[1] -= 0.3;//const
 			c.Round((v[0] + 0.5) * Game.Wcell - 0.5, v[1] * Game.Hcell, Shots.Radius * Game.Hcell);
 			c.ctx.closePath();
 		});
@@ -273,27 +279,43 @@ class Shots implements Elm {
 }//Name: Shots
 class NumNodes implements Elm {
 	Name = "NumNodes";
+	Enabled = true;
 	static LevelToMaxWeighting = 7;
-	nums: [number, number, number][] = [];//x,y,num
+	static Colors = ["#EEE", "#DFD", "#FDD"];//const
+	nums: [number, number, number, number][] = [];//x,y,num,Color
 	Add(x: number, y: number, num?: number) {
-		this.nums.push([x, y, num ? num : Math.max(2, (Math.random() * Game.level / NumNodes.LevelToMaxWeighting) << 0)/*TODO: Factor Count limit*/]);
+		this.nums.push([x, y, num ? num : Math.max(2, (Math.random() * Game.level / NumNodes.LevelToMaxWeighting) << 0)/*TODO: Factor Count limit*/, 0]);
+	}
+	Hint() {
+		if (Game.hintCount <= 0) return;
+		Game.hintCount--;
+		this.nums.forEach((num) => {
+			if (Factorization(num[2])[0] == 0) {//Prime number
+				num[3] = 1;
+			} else {
+				num[3] = 2;
+			}
+		});
 	}
 	Draw(c: ResizingCanvas, Span: number) {
-		c.ctx.fillStyle = "#EEE";//const
+		this.nums.forEach((v) => v[1] += 0.01/*const*/);
 		c.ctx.save();
 		c.Shadow();
-		c.ctx.beginPath();
-		this.nums.forEach((v) => {
-			v[1] += 0.1;
-			c.RoundedRect(v[0] * Game.Wcell, v[1] * Game.Hcell, Game.Wcell - 1, Game.Hcell, Game.Rcell);
-			c.ctx.closePath();
-		});
-		c.ctx.fill();
+		for (let tmp = 0; tmp < NumNodes.Colors.length; tmp++) {
+			c.ctx.fillStyle = NumNodes.Colors[tmp];
+			c.ctx.beginPath();
+			this.nums.forEach((v) => {
+				if (v[3] != tmp) return;
+				c.RoundedRect(v[0] * Game.Wcell, v[1] * Game.Hcell, Game.Wcell - 1, Game.Hcell, Game.Rcell);
+				c.ctx.closePath();
+			});
+			c.ctx.fill();
+		}
 		c.ctx.restore();
 		c.ctx.fillStyle = "#333";//const
 		c.ctx.font = `${c.S(Game.Hcell - 4) << 0}px ${Game.FontName}`;
 		this.nums.forEach((v) => {
-			c.TextCenter(v[2].toString(), (v[0] + 0.5) * Game.Wcell, (v[1] + 0.5) * Game.Hcell, Game.Wcell - 4, Game.Hcell - 2);
+			c.TextCenter(v[2].toString(), (v[0] + 0.5) * Game.Wcell, (v[1] + 0.5) * Game.Hcell, Game.Wcell - 4);
 		});
 	}
 	AfterDraw(Elms: Elm[], Span: number) {
@@ -314,8 +336,9 @@ class NumNodes implements Elm {
 }//Name: NumNodes
 class Filters implements Elm {
 	Name = "Filters";
+	Enabled = true;
 	static LevelToMaxWeighting = 7;
-	filters: number[] = [6];//y
+	filters: number[] = [];//y
 	Add(y: number) {
 		this.filters.push(y);
 	}
@@ -331,7 +354,36 @@ class Filters implements Elm {
 		c.ctx.stroke();
 		c.ctx.restore();
 	}
-}//Name: Filter
+}//Name: Filters
+class ButtonNodes implements Elm {
+	Name = "ButtonNodes";
+	Enabled = true;
+	static LevelToMaxWeighting = 7;
+	texts: { x: number, y: number, w: number, h: number, text: string, fontsize: number, fn: () => void }[] = [];//x,y,num
+	Add(x: number, y: number, w: number, h: number, text: string, fontsize: number, fn: () => void) {
+		this.texts.push({ x: x, y: y, w: w, h: h, text: text, fontsize: fontsize, fn: fn });
+	}
+	Clear() {
+		this.texts = [];
+	}
+	Draw(c: ResizingCanvas, Span: number) {
+		c.ctx.fillStyle = "#EEE";//const
+		c.ctx.save();
+		c.Shadow();
+		c.ctx.beginPath();
+		this.texts.forEach((v) => {
+			c.RoundedRect(v.x * Game.Wcell, v.y * Game.Hcell, v.w * Game.Wcell, v.h * Game.Hcell, Game.Rcell);
+			c.ctx.closePath();
+		});
+		c.ctx.fill();
+		c.ctx.restore();
+		c.ctx.fillStyle = "#333";//const
+		this.texts.forEach((v) => {
+			c.ctx.font = `${c.S(Game.Hcell * v.fontsize - 4) << 0}px ${Game.FontName}`;
+			c.TextCenter(v.text, (v.x + v.w / 2) * Game.Wcell, (v.y + v.h / 2) * Game.Hcell, Game.Wcell * v.w - 4);
+		});
+	}
+}//Name: ButtonNodes
 function OnhitNumShots(num: NumNodes, shots: Shots, span: number) {
 	let delNumI: number[] = [];
 	let delShotI: number[] = [];
@@ -376,7 +428,7 @@ function OnhitNumNum(num: NumNodes, unused: NumNodes, span: Number) {
 	}
 	if (fusionNumI.length == 0) return;
 	for (let fusionI = 0; fusionI < fusionNumI.length; fusionI += 2) {
-		num.nums.push([num.nums[fusionNumI[fusionI]][0], (num.nums[fusionNumI[fusionI]][1] + num.nums[fusionNumI[fusionI + 1]][1]) / 2, num.nums[fusionNumI[fusionI]][2] + num.nums[fusionNumI[fusionI + 1]][2]]);
+		num.Add(num.nums[fusionNumI[fusionI]][0], (num.nums[fusionNumI[fusionI]][1] + num.nums[fusionNumI[fusionI + 1]][1]) / 2, num.nums[fusionNumI[fusionI]][2] + num.nums[fusionNumI[fusionI + 1]][2]);
 	}
 	num.nums = num.nums.filter((v, i) => (fusionNumI.indexOf(i) < 0));
 	console.log(num.nums.length + ":" + fusionNumI.length);
@@ -399,18 +451,106 @@ function OnhitFiltersNum(filter: Filters, num: NumNodes, span: number) {
 		num.nums.splice(index, 1);
 	}
 }
+function OnhitBtnShots(btn: ButtonNodes, shots: Shots, span: number) {
+	let delBtnI: number[] = [];
+	let delShotI: number[] = [];
+	for (let si = 0; si < shots.shots.length; si++) {
+		if (delShotI.indexOf(si) >= 0) break;
+		for (let bi = 0; bi < btn.texts.length; bi++) {
+			if (delBtnI.indexOf(bi) >= 0) break;
+			if (btn.texts[bi].y - Shots.Radius <= shots.shots[si][1] && btn.texts[bi].y + btn.texts[bi].h + Shots.Radius >= shots.shots[si][1])
+				if (btn.texts[bi].x <= shots.shots[si][0] && btn.texts[bi].x + btn.texts[bi].w - 1 >= shots.shots[si][0]) {
+					delBtnI.push(bi);
+					delShotI.push(si);
+				}
+		}
+	}
+	while (delShotI.length > 0) shots.shots.splice(delShotI.pop(), 1);
+	while (delBtnI.length > 0) {
+		let index = delBtnI.pop();
+		btn.texts[index].fn();
+	}
+}
+function onLoad(Elms: Elm[]) {
+	Elms.find((e) => e.Name == "Dropper").Enabled = false;
+	Elms.find((e) => e.Name == "NumNodes").Enabled = false;
+	Elms.find((e) => e.Name == "Filters").Enabled = false;
+	let btns = Elms.find((e) => e.Name == "ButtonNodes");
+
+	if (btns instanceof ButtonNodes) {
+		btns.Add(1, 1, Game.Wcount - 2, 3, "Prime Shooter", 2, () => btns.texts[0].text = btns.texts[0].text == "Prime Shooter" ? "Do you like 13?" : "Prime Shooter");
+		btns.Add(1, 10, 3, 2, "Start", 1.5, () => {
+			Elms.find((e) => e.Name == "Dropper").Enabled = true;
+			Elms.find((e) => e.Name == "NumNodes").Enabled = true;
+			Elms.find((e) => e.Name == "Filters").Enabled = true;
+			Elms.find((e) => e.Name == "ButtonNodes").Enabled = false;
+			Elms.find((e) => e.Name == "Shots").Clear();
+			AddFilter(Elms);
+		});
+		btns.Add(Game.Wcount - 4, 10, 3, 2, "Help", 1.5, () => {
+			document.getElementById("help").classList.toggle("hide");
+		});
+	} else throw "ERROR";
+}
 function onTick(Elms: Elm[], span: number) {
-	const HintPerLivel = 100 * NumNodes.LevelToMaxWeighting;
+	const HintPerLivel = 13 * NumNodes.LevelToMaxWeighting;
+	const FilterPerLivel = 97 * NumNodes.LevelToMaxWeighting;
 	if (Game.level > Game.maxLevel) {
 		if (((Game.level / HintPerLivel)) << 0 > ((Game.maxLevel / HintPerLivel) << 0)) {
 			Game.hintCount++;
+		}
+		if (((Game.level / FilterPerLivel)) << 0 > ((Game.maxLevel / FilterPerLivel) << 0)) {
+			AddFilter(Elms);
 		}
 		Game.maxLevel = Game.level;
 	}
 	if (Game.life <= 0) {
 		Game.life = 0;
+		Elms.find((e) => e.Name == "Dropper").Enabled = false;
+		Elms.find((e) => e.Name == "NumNodes").Enabled = false;
+		Elms.find((e) => e.Name == "Filters").Enabled = false;
+		let btns = Elms.find((e) => e.Name == "ButtonNodes");
+		if (btns instanceof ButtonNodes) {
+			btns.Clear();
+			btns.Add(1, 10, 3, 2, "Add to ranking", 1.5, () => {
+			});
+		} else throw "ERROR";
 		//console.log("GAMEOVER");
 	}
+}
+function AddFilter(Elms: Elm[]) {
+	Elms.find((e) => e.Name == "Dropper").Enabled = false;
+	Elms.find((e) => e.Name == "NumNodes").Enabled = false;
+	let tmp = Elms.find((e) => e.Name == "Filters");
+	if (tmp instanceof Filters) {
+		tmp.Add(5);
+	}
+	let btns = Elms.find((e) => e.Name == "ButtonNodes");
+	if (btns instanceof ButtonNodes) {
+		btns.Enabled = true;
+		btns.Clear();
+
+		btns.Add(1, 10, 1, 2, "↑", 1.5, () => {
+			let tmp = Elms.find((e) => e.Name == "Filters");
+			if (tmp instanceof Filters) {
+				tmp.filters[tmp.filters.length - 1] = Math.min(Game.Hcount - 5, Math.max(0, tmp.filters[tmp.filters.length - 1] - 1));
+			}
+		});
+		btns.Add(2, 10, 1, 2, "↓", 1.5, () => {
+			let tmp = Elms.find((e) => e.Name == "Filters");
+			if (tmp instanceof Filters) {
+				tmp.filters[tmp.filters.length - 1] = Math.min(Game.Hcount - 5, Math.max(0, tmp.filters[tmp.filters.length + 1] - 1));
+			}
+		});
+		btns.Add(3, 10, Game.Wcount - 4, 2, "Enter", 1.5, () => {
+			Elms.find((e) => e.Name == "Dropper").Enabled = true;
+			Elms.find((e) => e.Name == "NumNodes").Enabled = true;
+			Elms.find((e) => e.Name == "ButtonNodes").Enabled = false;
+		});
+	} else throw "ERROR";
+
+
+
 }
 namespace Game {
 	export const Wcount = 9;//CellWidth+BorderWidth
@@ -425,14 +565,16 @@ namespace Game {
 	export let life = 20;//const
 	export let hintCount = 0;
 	let c1: ResizingCanvas;
-	let Elms: Elm[] = [new BackDrawer(), new Dropper(), new Shooter().Init(), new Shots(), new NumNodes(), new Filters()];
+	let Elms: Elm[] = [new BackDrawer(), new Dropper(), new Shooter().Init(), new Shots(), new NumNodes(), new Filters(), new ButtonNodes()];
 	let OnHit: { Fn: (Elm1: Elm, Elm2: Elm, Span: number) => void, Elm1: string, Elm2: string }[] = [
+		{ Fn: OnhitBtnShots, Elm1: "ButtonNodes", Elm2: "Shots" },
 		{ Fn: OnhitNumShots, Elm1: "NumNodes", Elm2: "Shots" },
 		{ Fn: OnhitNumNum, Elm1: "NumNodes", Elm2: "NumNodes" },
 		{ Fn: OnhitFiltersNum, Elm1: "Filters", Elm2: "NumNodes" }
 	];
 	export function Init(): void {
 		c1 = new ResizingCanvas(document.getElementById("c1"), document.documentElement, Wcell * Wcount, Hcell * Hcount);
+		onLoad(Elms);
 	}
 	let prevTime: number = undefined;
 	export function Tick(pt: number): void {
@@ -440,20 +582,21 @@ namespace Game {
 			prevTime = pt;
 		}
 		Elms.forEach((elm) => {
-			if ("BeforeDraw" in elm) elm.BeforeDraw(Elms, pt - prevTime);
+			if ("BeforeDraw" in elm && elm.Enabled) elm.BeforeDraw(Elms, pt - prevTime);
 		});
 		Elms.forEach((elm) => {
-			if ("Draw" in elm) elm.Draw(c1, pt - prevTime);
+			if ("Draw" in elm && elm.Enabled) elm.Draw(c1, pt - prevTime);
 		});
 		Elms.forEach((elm) => {
-			if ("AfterDraw" in elm) elm.AfterDraw(Elms, pt - prevTime);
+			if ("AfterDraw" in elm && elm.Enabled) elm.AfterDraw(Elms, pt - prevTime);
 		});
 		OnHit.forEach((listener) => {
 			let tmp1 = Elms.find((v) => v.Name == listener.Elm1);
 			if (!tmp1) throw "undefined node name";
 			let tmp2 = Elms.find((v) => v.Name == listener.Elm2);
 			if (!tmp2) throw "undefined node name";
-			listener.Fn(tmp1, tmp2, pt - prevTime);
+			if (tmp1.Enabled && tmp2.Enabled)
+				listener.Fn(tmp1, tmp2, pt - prevTime);
 		});
 		prevTime = pt;
 		onTick(Elms, pt - prevTime);
