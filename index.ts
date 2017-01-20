@@ -1,4 +1,3 @@
-//TODO: Help-素数色分け機能
 namespace Polyfill {
 	export function Do() {
 		let timer: number = undefined;
@@ -138,9 +137,10 @@ class BackDrawer implements Elm {
 class Dropper implements Elm {
 	Name = "Dropper";
 	Enabled = true;
-	private dx = -3;//const per 1sec
+	private dx = 10;// per 1sec
 	private x = ((Game.Wcount - 1) / 2) << 0;
 	BeforeDraw(Elms: Elm[], Span: number) {
+		this.dx = Math.sign(this.dx) * Math.min(9, 3 + (Math.max(Game.level / NumNodes.LevelToMaxWeighting, 200) - 200) / 31);//const
 		const TurnProbability = 0.4;
 		const DropProbability = 0.2;
 		if ((this.x << 0) != (this.x + this.dx * Span / 1000) << 0) {
@@ -148,7 +148,11 @@ class Dropper implements Elm {
 			if (Math.random() < TurnProbability)
 				this.dx *= -1;
 			if (Math.random() < DropProbability) {
-				Elms.find((v) => v.Name == "NumNodes").Add(Math.round(this.x + Game.Wcell) % Game.Wcell, 0);
+				let numnode = Elms.find((v) => v.Name == "NumNodes");
+				if (numnode instanceof NumNodes) {
+					if (numnode.nums.some((v) => v[0] == Math.round(this.x + Game.Wcell) % Game.Wcell && v[1] < 1)) return;
+					numnode.Add(Math.round(this.x + Game.Wcell) % Game.Wcell, 0);
+				} else throw "ERROR";
 			}
 		}
 	}
@@ -192,6 +196,9 @@ class Shooter implements Elm {
 			if (tmp < 0) return;
 			e.preventDefault();
 			it.KeyMode[tmp] = 0;
+		});
+		window.addEventListener("blur", (e) => {
+			it.KeyMode = it.KeyMode.fill(0);
 		});
 		return this;
 	}
@@ -280,10 +287,24 @@ class Shots implements Elm {
 class NumNodes implements Elm {
 	Name = "NumNodes";
 	Enabled = true;
-	static LevelToMaxWeighting = 7;
+	static LevelToMaxWeighting = 7;//const
 	static Colors = ["#EEE", "#DFD", "#FDD"];//const
+	static MaxFactCount = 4;//const
 	nums: [number, number, number, number][] = [];//x,y,num,Color
 	Add(x: number, y: number, num?: number) {
+		if (!num) {
+			while (true) {
+				num = Math.max(2, (Math.random() * Game.level / NumNodes.LevelToMaxWeighting) << 0);
+				let tmp = num;
+				let i = 0;
+				for (; i < NumNodes.MaxFactCount; i++) {
+					let tmp2 = Factorization(tmp);
+					if (tmp2[0] == 0) break;
+					tmp = tmp2[1];
+				}
+				if (i != NumNodes.MaxFactCount) break;
+			}
+		}
 		this.nums.push([x, y, num ? num : Math.max(2, (Math.random() * Game.level / NumNodes.LevelToMaxWeighting) << 0)/*TODO: Factor Count limit*/, 0]);
 	}
 	Hint() {
@@ -384,6 +405,23 @@ class ButtonNodes implements Elm {
 		});
 	}
 }//Name: ButtonNodes
+class Fading implements Elm {
+	Name = "Fading";
+	Enabled = true;
+	Finished = false;
+	CurrentBrightness = 1;
+	Speed = 0.01;//const
+	Draw(c: ResizingCanvas, Span: number) {
+		if (this.CurrentBrightness > 0) {
+			c.ctx.fillStyle = "#000";//const
+			c.ctx.globalAlpha = 1 - this.CurrentBrightness;
+			c.ctx.fillRect(0, 0, c.S(Game.Wcell * (Game.Wcount + 1)), c.S(Game.Hcell * (Game.Hcount + 1)));
+			this.CurrentBrightness -= this.Speed;
+		} else {
+			this.Finished = true;
+		}
+	}
+}//Name:Fading
 function OnhitNumShots(num: NumNodes, shots: Shots, span: number) {
 	let delNumI: number[] = [];
 	let delShotI: number[] = [];
@@ -431,7 +469,6 @@ function OnhitNumNum(num: NumNodes, unused: NumNodes, span: Number) {
 		num.Add(num.nums[fusionNumI[fusionI]][0], (num.nums[fusionNumI[fusionI]][1] + num.nums[fusionNumI[fusionI + 1]][1]) / 2, num.nums[fusionNumI[fusionI]][2] + num.nums[fusionNumI[fusionI + 1]][2]);
 	}
 	num.nums = num.nums.filter((v, i) => (fusionNumI.indexOf(i) < 0));
-	console.log(num.nums.length + ":" + fusionNumI.length);
 }
 function OnhitFiltersNum(filter: Filters, num: NumNodes, span: number) {
 	let delNumI: number[] = [];
@@ -472,6 +509,8 @@ function OnhitBtnShots(btn: ButtonNodes, shots: Shots, span: number) {
 	}
 }
 function onLoad(Elms: Elm[]) {
+	Elms.find((e) => e.Name == "Fading").Enabled = false;
+
 	Elms.find((e) => e.Name == "Dropper").Enabled = false;
 	Elms.find((e) => e.Name == "NumNodes").Enabled = false;
 	Elms.find((e) => e.Name == "Filters").Enabled = false;
@@ -479,7 +518,7 @@ function onLoad(Elms: Elm[]) {
 
 	if (btns instanceof ButtonNodes) {
 		btns.Add(1, 1, Game.Wcount - 2, 3, "Prime Shooter", 2, () => btns.texts[0].text = btns.texts[0].text == "Prime Shooter" ? "Do you like 13?" : "Prime Shooter");
-		btns.Add(1, 10, 3, 2, "Start", 1.5, () => {
+		btns.Add(1, 11, 3, 2, "Start", 1.5, () => {
 			Elms.find((e) => e.Name == "Dropper").Enabled = true;
 			Elms.find((e) => e.Name == "NumNodes").Enabled = true;
 			Elms.find((e) => e.Name == "Filters").Enabled = true;
@@ -487,7 +526,7 @@ function onLoad(Elms: Elm[]) {
 			Elms.find((e) => e.Name == "Shots").Clear();
 			AddFilter(Elms);
 		});
-		btns.Add(Game.Wcount - 4, 10, 3, 2, "Help", 1.5, () => {
+		btns.Add(Game.Wcount - 4, 11, 3, 2, "Help", 1.5, () => {
 			document.getElementById("help").classList.toggle("hide");
 		});
 	} else throw "ERROR";
@@ -505,52 +544,66 @@ function onTick(Elms: Elm[], span: number) {
 		Game.maxLevel = Game.level;
 	}
 	if (Game.life <= 0) {
-		Game.life = 0;
-		Elms.find((e) => e.Name == "Dropper").Enabled = false;
-		Elms.find((e) => e.Name == "NumNodes").Enabled = false;
-		Elms.find((e) => e.Name == "Filters").Enabled = false;
-		let btns = Elms.find((e) => e.Name == "ButtonNodes");
-		if (btns instanceof ButtonNodes) {
-			btns.Clear();
-			btns.Add(1, 10, 3, 2, "Add to ranking", 1.5, () => {
-			});
-		} else throw "ERROR";
-		//console.log("GAMEOVER");
+		if (!Elms.find((e) => e.Name == "Fading").Finished) {//Gaveover & Fading_Finished
+			if (!Elms.find((e) => e.Name == "Fading").Enabled) {
+				Game.life = 0;
+				Elms.find((e) => e.Name == "Dropper").Enabled = false;
+				Elms.find((e) => e.Name == "NumNodes").Enabled = false;
+				Elms.find((e) => e.Name == "Filters").Enabled = false;
+				Elms.find((e) => e.Name == "Fading").Enabled = true;
+			}
+		} else if (Elms.find((e) => e.Name == "Fading").Enabled) {
+
+			Elms.find((e) => e.Name == "Shots").shots = [];
+			Elms.find((e) => e.Name == "Fading").Enabled = false;
+			let btns = Elms.find((e) => e.Name == "ButtonNodes");
+			if (btns instanceof ButtonNodes) {
+				btns.Enabled = true;
+				btns.Clear();
+				btns.Add(1, 1, Game.Wcount - 2, 3, "Gameover", 2, () => alert("そうかそうか、そんなに13が好きか。それはいいことだ。あそこまできれいな素数は他にはないと私は思うのだが・・・どう思うかね？ワトソンくん"));
+				btns.Add(2, 5, Game.Wcount - 4, 1, `Score: ${Game.score}pt`, 1, () => 0);
+				btns.Add(2, 6.5, Game.Wcount - 4, 1, `Level: ${Game.level}`, 1, () => 0);
+				btns.Add(2, 8, Game.Wcount - 4, 1, `Rank: 13/35`/**TODO*/, 1, () => 0);
+				btns.Add(1.5, 11, Game.Wcount - 3, 2, "Add to ranking", 1.5, () => {
+					//TODO
+				});
+			} else throw "ERROR";
+		}
 	}
 }
 function AddFilter(Elms: Elm[]) {
+	let shots = Elms.find((e) => e.Name == "Shots").shots;
+	let shooterX = Elms.find((e) => e.Name == "Shooter").x;
 	Elms.find((e) => e.Name == "Dropper").Enabled = false;
 	Elms.find((e) => e.Name == "NumNodes").Enabled = false;
+	Elms.find((e) => e.Name == "Shooter").x = 2;
 	let tmp = Elms.find((e) => e.Name == "Filters");
-	if (tmp instanceof Filters) {
-		tmp.Add(5);
-	}
+	if (tmp instanceof Filters) tmp.Add(5);
 	let btns = Elms.find((e) => e.Name == "ButtonNodes");
 	if (btns instanceof ButtonNodes) {
 		btns.Enabled = true;
 		btns.Clear();
-
-		btns.Add(1, 10, 1, 2, "↑", 1.5, () => {
+		btns.Add(1, 1, Game.Wcount - 2, 3, "Add Filter", 2, () => btns.texts[0].text = btns.texts[0].text == "Add Filter" ? "You like 13!" : "Add Filter");
+		btns.Add(1, Game.Hcount - 9, 1, 2, "↑", 1.5, () => {
 			let tmp = Elms.find((e) => e.Name == "Filters");
 			if (tmp instanceof Filters) {
-				tmp.filters[tmp.filters.length - 1] = Math.min(Game.Hcount - 5, Math.max(0, tmp.filters[tmp.filters.length - 1] - 1));
+				tmp.filters[tmp.filters.length - 1] = Math.min(Game.Hcount - 5, Math.max(2, tmp.filters[tmp.filters.length - 1] - 1));
 			}
 		});
-		btns.Add(2, 10, 1, 2, "↓", 1.5, () => {
+		btns.Add(2, Game.Hcount - 9, 1, 2, "↓", 1.5, () => {
 			let tmp = Elms.find((e) => e.Name == "Filters");
 			if (tmp instanceof Filters) {
-				tmp.filters[tmp.filters.length - 1] = Math.min(Game.Hcount - 5, Math.max(0, tmp.filters[tmp.filters.length + 1] - 1));
+				tmp.filters[tmp.filters.length - 1] = Math.min(Game.Hcount - 5, Math.max(2, tmp.filters[tmp.filters.length - 1] + 1));
 			}
 		});
-		btns.Add(3, 10, Game.Wcount - 4, 2, "Enter", 1.5, () => {
+		btns.Add(3, Game.Hcount - 9, Game.Wcount - 4, 2, "Enter&Start", 1.5, () => {
 			Elms.find((e) => e.Name == "Dropper").Enabled = true;
 			Elms.find((e) => e.Name == "NumNodes").Enabled = true;
 			Elms.find((e) => e.Name == "ButtonNodes").Enabled = false;
+			Elms.find((e) => e.Name == "Shots").shots = shots;
+			Elms.find((e) => e.Name == "Shooter").x = shooterX;
 		});
 	} else throw "ERROR";
-
-
-
 }
 namespace Game {
 	export const Wcount = 9;//CellWidth+BorderWidth
@@ -565,7 +618,7 @@ namespace Game {
 	export let life = 20;//const
 	export let hintCount = 0;
 	let c1: ResizingCanvas;
-	let Elms: Elm[] = [new BackDrawer(), new Dropper(), new Shooter().Init(), new Shots(), new NumNodes(), new Filters(), new ButtonNodes()];
+	let Elms: Elm[] = [new BackDrawer(), new Dropper(), new Shooter().Init(), new Shots(), new NumNodes(), new Filters(), new ButtonNodes(), new Fading()];
 	let OnHit: { Fn: (Elm1: Elm, Elm2: Elm, Span: number) => void, Elm1: string, Elm2: string }[] = [
 		{ Fn: OnhitBtnShots, Elm1: "ButtonNodes", Elm2: "Shots" },
 		{ Fn: OnhitNumShots, Elm1: "NumNodes", Elm2: "Shots" },
