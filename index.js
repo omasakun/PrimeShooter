@@ -47,7 +47,7 @@ class ResizingCanvas {
     }
     OnResize(dpr) {
         let Canvas = this.ctx.canvas;
-        let Scale = Math.min(this.Parent.clientWidth / this.width, this.Parent.clientHeight / this.height);
+        let Scale = Math.min((this.Parent.clientWidth - 10) / this.width, (this.Parent.clientHeight - 10) / this.height);
         Canvas.style.width = Scale * this.width + "px";
         Canvas.style.height = Scale * this.height + "px";
         Scale *= (dpr || window.devicePixelRatio || 1);
@@ -137,7 +137,7 @@ class Dropper {
     BeforeDraw(Elms, Span) {
         this.dx = Math.sign(this.dx) * Math.min(9, 3 + (Math.max(Game.level / NumNodes.LevelToMaxWeighting, 200) - 200) / 31);
         const TurnProbability = 0.4;
-        const DropProbability = 0.2;
+        const DropProbability = 0.3;
         if ((this.x << 0) != (this.x + this.dx * Span / 1000) << 0) {
             this.x = (this.x + this.dx * Span / 1000);
             if (Math.random() < TurnProbability)
@@ -175,7 +175,7 @@ class Shooter {
         this.Keymap = [37, 39, 38, 72];
         this.KeySleepMax1 = [9, 9, 9, Infinity];
         this.KeySleepMax2 = [6, 6, 3, Infinity];
-        this.KeyMode = [0, 0, 0];
+        this.KeyMode = [0, 0, 0, 0];
         this.dx = 0;
         this.x = ((Game.Wcount - 1) / 2) << 0;
         this.y = 28;
@@ -371,7 +371,7 @@ class NumNodes {
 }
 NumNodes.LevelToMaxWeighting = 7;
 NumNodes.Colors = ["#EEE", "#DFD", "#FDD"];
-NumNodes.MaxFactCount = 4;
+NumNodes.MaxFactCount = 6;
 class Filters {
     constructor() {
         this.Name = "Filters";
@@ -550,7 +550,7 @@ function onLoad(Elms) {
     Elms.find((e) => e.Name == "Filters").Enabled = false;
     let btns = Elms.find((e) => e.Name == "ButtonNodes");
     if (btns instanceof ButtonNodes) {
-        btns.Add(1, 1, Game.Wcount - 2, 3, "Prime Shooter", 2, () => btns.texts[0].text = btns.texts[0].text == "Prime Shooter" ? "Do you like 13?" : "Prime Shooter");
+        btns.Add(1, 1, Game.Wcount - 2, 3, "Prime Shooter", 2, () => btns.texts[0].text = btns.texts[0].text == "Prime Shooter" ? "素数シューティング" : "Prime Shooter");
         btns.Add(1, 11, 3, 2, "Start", 1.5, () => {
             Elms.find((e) => e.Name == "Dropper").Enabled = true;
             Elms.find((e) => e.Name == "NumNodes").Enabled = true;
@@ -597,9 +597,38 @@ function onTick(Elms, span) {
                 btns.Clear();
                 btns.Add(1, 1, Game.Wcount - 2, 3, "Gameover", 2, () => alert("そうかそうか、そんなに13が好きか。それはいいことだ。あそこまできれいな素数は他にはないと私は思うのだが・・・どう思うかね？ワトソンくん"));
                 btns.Add(2, 5, Game.Wcount - 4, 1, `Score: ${Game.score}pt`, 1, () => 0);
-                btns.Add(2, 6.5, Game.Wcount - 4, 1, `Level: ${Game.level}`, 1, () => 0);
-                btns.Add(2, 8, Game.Wcount - 4, 1, `Rank: 13/35`, 1, () => 0);
-                btns.Add(1.5, 11, Game.Wcount - 3, 2, "Add to ranking", 1.5, () => {
+                btns.Add(2, 6.5, Game.Wcount - 4, 1, `Rank: ...`, 1, () => 0);
+                btns.Add(1.5, 11, Game.Wcount - 3, 2, "Add to Ranking", 1.5, () => {
+                    if (btns instanceof ButtonNodes) {
+                        if (btns.texts[btns.texts.length - 1].text == "Add to Ranking") {
+                            let name = prompt("Enter your name...", "anonymous");
+                            if (!!name && name.length > 0) {
+                                btns.texts[btns.texts.length - 1].text = "...";
+                                let count = 0;
+                                function Tmp() {
+                                    count++;
+                                    if (btns instanceof ButtonNodes && count == 2)
+                                        btns.texts[btns.texts.length - 1].text = "Finish!";
+                                }
+                                MyStorage.Add(2, JSON.stringify({ Score: Game.score, Level: Game.level, Name: name }), Tmp);
+                                MyStorage.Add(3, JSON.stringify({ Date: DateFormat(new Date()), IP: IPAddress, UA: window.navigator.userAgent }), Tmp);
+                            }
+                        }
+                    }
+                });
+                MyStorage.Get(2, (text) => {
+                    let data = text.map((t) => JSON.parse(t));
+                    data = data.sort((a, b) => b.Score - a.Score);
+                    let list = document.getElementById("rankingList");
+                    list.innerHTML = "";
+                    data.forEach((v, i) => {
+                        list.innerHTML += `<li><div>#${i + 1}</div><div>${v.Score}pt</div><div>Lv.${(v.Level % NumNodes.LevelToMaxWeighting == 0 ? (v.Level / NumNodes.LevelToMaxWeighting).toString() : Game.level.toString() + "÷" + NumNodes.LevelToMaxWeighting.toString())}</div><div>${v.Name}</div></li>`;
+                    });
+                    let rank = data.findIndex((v) => v.Score <= Game.score) + 1;
+                    if (rank == 0)
+                        rank = data.length + 1;
+                    btns.texts[2].text = `Rank: ${rank}/${data.length + 1}`;
+                    document.getElementById("ranking").classList.remove("hide");
                 });
             }
             else
@@ -612,6 +641,7 @@ function AddFilter(Elms) {
     let shooterX = Elms.find((e) => e.Name == "Shooter").x;
     Elms.find((e) => e.Name == "Dropper").Enabled = false;
     Elms.find((e) => e.Name == "NumNodes").Enabled = false;
+    Elms.find((e) => e.Name == "Shooter").KeyMode = Elms.find((e) => e.Name == "Shooter").KeyMode.fill(0);
     Elms.find((e) => e.Name == "Shooter").x = 2;
     let tmp = Elms.find((e) => e.Name == "Filters");
     if (tmp instanceof Filters)
@@ -620,7 +650,7 @@ function AddFilter(Elms) {
     if (btns instanceof ButtonNodes) {
         btns.Enabled = true;
         btns.Clear();
-        btns.Add(1, 1, Game.Wcount - 2, 3, "Add Filter", 2, () => btns.texts[0].text = btns.texts[0].text == "Add Filter" ? "You like 13!" : "Add Filter");
+        btns.Add(1, 1, Game.Wcount - 2, 3, "Add Filter", 2, () => btns.texts[0].text = btns.texts[0].text == "Add Filter" ? "13っていいよね！" : "Add Filter");
         btns.Add(1, Game.Hcount - 9, 1, 2, "↑", 1.5, () => {
             let tmp = Elms.find((e) => e.Name == "Filters");
             if (tmp instanceof Filters) {
@@ -702,8 +732,49 @@ var Game;
     }
     Game.Tick = Tick;
 })(Game || (Game = {}));
+function LoadScript(src) {
+    let script = document.createElement('script');
+    script.src = src;
+    document.body.appendChild(script);
+}
+function DateFormat(date) {
+    var y = date.getFullYear();
+    var m = date.getMonth() + 1;
+    var d = date.getDate();
+    var h = date.getHours();
+    var min = date.getMinutes();
+    var s = date.getSeconds();
+    return `${y}/${m}/${d} ${h}:${min}:${s}`;
+}
+;
+let IPAddress = "";
+function AddAccessLog(text) {
+    IPAddress = text.address;
+    MyStorage.Add(1, DateFormat(new Date()) + " " + IPAddress + " " + window.navigator.userAgent, () => 0);
+}
+var MyStorage;
+(function (MyStorage) {
+    let URL = "https://script.google.com/macros/s/AKfycbwgY_buxMtX3TLIxYrNfpyFZhyewRU0A3TnvDCi4A5yyY20AT0/exec";
+    function GettingURL(id) {
+        return `${URL}?type=Get&ID=${id.toString()}&prefix=${encodeURIComponent("MyStorage._GetCB")}`;
+    }
+    function AddingURL(id, text) {
+        return `${URL}?type=Add&ID=${id.toString()}&Text=${encodeURIComponent(text)}&prefix=${encodeURIComponent("MyStorage._AddCB")}`;
+    }
+    function Get(id, fn) {
+        MyStorage._GetCB = fn;
+        LoadScript(GettingURL(id));
+    }
+    MyStorage.Get = Get;
+    function Add(id, text, fn) {
+        MyStorage._AddCB = fn;
+        LoadScript(AddingURL(id, text));
+    }
+    MyStorage.Add = Add;
+})(MyStorage || (MyStorage = {}));
 Polyfill.Do();
 window.addEventListener("load", () => {
+    LoadScript("http://v4v6.ipv6-test.com/api/myip.php?json&callback=AddAccessLog");
     Game.Init();
     function Tick() {
         Game.Tick(GetTime());

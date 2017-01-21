@@ -47,7 +47,7 @@ class ResizingCanvas {
 	OnResize(dpr?: number) {
 		let Canvas = this.ctx.canvas;
 		let Scale = Math.min(
-			this.Parent.clientWidth / this.width, this.Parent.clientHeight / this.height);
+			(this.Parent.clientWidth - 10/*const*/) / this.width, (this.Parent.clientHeight - 10/*const*/) / this.height);
 		Canvas.style.width = Scale * this.width + "px";
 		Canvas.style.height = Scale * this.height + "px";
 		Scale *= (dpr || window.devicePixelRatio || 1);
@@ -142,7 +142,7 @@ class Dropper implements Elm {
 	BeforeDraw(Elms: Elm[], Span: number) {
 		this.dx = Math.sign(this.dx) * Math.min(9, 3 + (Math.max(Game.level / NumNodes.LevelToMaxWeighting, 200) - 200) / 31);//const
 		const TurnProbability = 0.4;
-		const DropProbability = 0.2;
+		const DropProbability = 0.3;
 		if ((this.x << 0) != (this.x + this.dx * Span / 1000) << 0) {
 			this.x = (this.x + this.dx * Span / 1000);
 			if (Math.random() < TurnProbability)
@@ -176,7 +176,7 @@ class Shooter implements Elm {
 	private Keymap = [37, 39, 38, 72];//CONST Left Right Shot Help
 	private KeySleepMax1 = [9, 9, 9, Infinity]; //CONST
 	private KeySleepMax2 = [6, 6, 3, Infinity]; //CONST
-	private KeyMode = [0, 0, 0]//0:Not pressed 1+:pressed tick count
+	private KeyMode = [0, 0, 0, 0]//0:Not pressed 1+:pressed tick count
 	private dx = 0;//per tick
 	private x = ((Game.Wcount - 1) / 2) << 0;
 	private y = 28;//CONST
@@ -289,7 +289,7 @@ class NumNodes implements Elm {
 	Enabled = true;
 	static LevelToMaxWeighting = 7;//const
 	static Colors = ["#EEE", "#DFD", "#FDD"];//const
-	static MaxFactCount = 4;//const
+	static MaxFactCount = 6;//const
 	nums: [number, number, number, number][] = [];//x,y,num,Color
 	Add(x: number, y: number, num?: number) {
 		if (!num) {
@@ -305,7 +305,7 @@ class NumNodes implements Elm {
 				if (i != NumNodes.MaxFactCount) break;
 			}
 		}
-		this.nums.push([x, y, num ? num : Math.max(2, (Math.random() * Game.level / NumNodes.LevelToMaxWeighting) << 0)/*TODO: Factor Count limit*/, 0]);
+		this.nums.push([x, y, num ? num : Math.max(2, (Math.random() * Game.level / NumNodes.LevelToMaxWeighting) << 0), 0]);
 	}
 	Hint() {
 		if (Game.hintCount <= 0) return;
@@ -517,7 +517,7 @@ function onLoad(Elms: Elm[]) {
 	let btns = Elms.find((e) => e.Name == "ButtonNodes");
 
 	if (btns instanceof ButtonNodes) {
-		btns.Add(1, 1, Game.Wcount - 2, 3, "Prime Shooter", 2, () => btns.texts[0].text = btns.texts[0].text == "Prime Shooter" ? "Do you like 13?" : "Prime Shooter");
+		btns.Add(1, 1, Game.Wcount - 2, 3, "Prime Shooter", 2, () => btns.texts[0].text = btns.texts[0].text == "Prime Shooter" ? "素数シューティング" : "Prime Shooter");
 		btns.Add(1, 11, 3, 2, "Start", 1.5, () => {
 			Elms.find((e) => e.Name == "Dropper").Enabled = true;
 			Elms.find((e) => e.Name == "NumNodes").Enabled = true;
@@ -553,7 +553,6 @@ function onTick(Elms: Elm[], span: number) {
 				Elms.find((e) => e.Name == "Fading").Enabled = true;
 			}
 		} else if (Elms.find((e) => e.Name == "Fading").Enabled) {
-
 			Elms.find((e) => e.Name == "Shots").shots = [];
 			Elms.find((e) => e.Name == "Fading").Enabled = false;
 			let btns = Elms.find((e) => e.Name == "ButtonNodes");
@@ -562,10 +561,37 @@ function onTick(Elms: Elm[], span: number) {
 				btns.Clear();
 				btns.Add(1, 1, Game.Wcount - 2, 3, "Gameover", 2, () => alert("そうかそうか、そんなに13が好きか。それはいいことだ。あそこまできれいな素数は他にはないと私は思うのだが・・・どう思うかね？ワトソンくん"));
 				btns.Add(2, 5, Game.Wcount - 4, 1, `Score: ${Game.score}pt`, 1, () => 0);
-				btns.Add(2, 6.5, Game.Wcount - 4, 1, `Level: ${Game.level}`, 1, () => 0);
-				btns.Add(2, 8, Game.Wcount - 4, 1, `Rank: 13/35`/**TODO*/, 1, () => 0);
-				btns.Add(1.5, 11, Game.Wcount - 3, 2, "Add to ranking", 1.5, () => {
-					//TODO
+				btns.Add(2, 6.5, Game.Wcount - 4, 1, `Rank: ...`, 1, () => 0);
+				btns.Add(1.5, 11, Game.Wcount - 3, 2, "Add to Ranking", 1.5, () => {
+					if (btns instanceof ButtonNodes) {
+						if (btns.texts[btns.texts.length - 1].text == "Add to Ranking") {
+							let name = prompt("Enter your name...", "anonymous");
+							if (!!name && name.length > 0) {
+								btns.texts[btns.texts.length - 1].text = "...";
+								let count = 0;
+								function Tmp() {
+									count++;
+									if (btns instanceof ButtonNodes && count == 2)
+										btns.texts[btns.texts.length - 1].text = "Finish!";
+								}
+								MyStorage.Add(2, JSON.stringify({ Score: Game.score, Level: Game.level, Name: name }), Tmp);
+								MyStorage.Add(3, JSON.stringify({ Date: DateFormat(new Date()), IP: IPAddress, UA: window.navigator.userAgent }), Tmp);
+							}
+						}
+					}
+				});
+				MyStorage.Get(2, (text) => {
+					let data: { Score: number, Level: number, Name: string, Date: string }[] = text.map((t) => JSON.parse(t));
+					data = data.sort((a, b) => b.Score - a.Score);
+					let list = document.getElementById("rankingList");
+					list.innerHTML = "";
+					data.forEach((v, i) => {
+						list.innerHTML += `<li><div>#${i + 1}</div><div>${v.Score}pt</div><div>Lv.${(v.Level % NumNodes.LevelToMaxWeighting == 0 ? (v.Level / NumNodes.LevelToMaxWeighting).toString() : Game.level.toString() + "÷" + NumNodes.LevelToMaxWeighting.toString())}</div><div>${v.Name}</div></li>`;
+					});
+					let rank = data.findIndex((v) => v.Score <= Game.score) + 1;
+					if (rank == 0) rank = data.length + 1;
+					btns.texts[2].text = `Rank: ${rank}/${data.length + 1}`;
+					document.getElementById("ranking").classList.remove("hide");
 				});
 			} else throw "ERROR";
 		}
@@ -576,6 +602,7 @@ function AddFilter(Elms: Elm[]) {
 	let shooterX = Elms.find((e) => e.Name == "Shooter").x;
 	Elms.find((e) => e.Name == "Dropper").Enabled = false;
 	Elms.find((e) => e.Name == "NumNodes").Enabled = false;
+	Elms.find((e) => e.Name == "Shooter").KeyMode = Elms.find((e) => e.Name == "Shooter").KeyMode.fill(0);
 	Elms.find((e) => e.Name == "Shooter").x = 2;
 	let tmp = Elms.find((e) => e.Name == "Filters");
 	if (tmp instanceof Filters) tmp.Add(5);
@@ -583,7 +610,7 @@ function AddFilter(Elms: Elm[]) {
 	if (btns instanceof ButtonNodes) {
 		btns.Enabled = true;
 		btns.Clear();
-		btns.Add(1, 1, Game.Wcount - 2, 3, "Add Filter", 2, () => btns.texts[0].text = btns.texts[0].text == "Add Filter" ? "You like 13!" : "Add Filter");
+		btns.Add(1, 1, Game.Wcount - 2, 3, "Add Filter", 2, () => btns.texts[0].text = btns.texts[0].text == "Add Filter" ? "13っていいよね！" : "Add Filter");
 		btns.Add(1, Game.Hcount - 9, 1, 2, "↑", 1.5, () => {
 			let tmp = Elms.find((e) => e.Name == "Filters");
 			if (tmp instanceof Filters) {
@@ -656,9 +683,51 @@ namespace Game {
 	}
 }
 
+
+function LoadScript(src: string) {
+	let script = document.createElement('script');
+	script.src = src;
+	document.body.appendChild(script);
+}
+function DateFormat(date) {
+	var y = date.getFullYear();
+	var m = date.getMonth() + 1;
+	var d = date.getDate();
+	var h = date.getHours();
+	var min = date.getMinutes();
+	var s = date.getSeconds();
+	return `${y}/${m}/${d} ${h}:${min}:${s}`;
+};
+let IPAddress: string = "";
+function AddAccessLog(text: any) {
+	IPAddress = text.address;
+	MyStorage.Add(1, DateFormat(new Date()) + " " + IPAddress + " " + window.navigator.userAgent, () => 0);
+}
+namespace MyStorage {
+	export let _GetCB: (data: string[]) => void;
+	export let _AddCB: () => void;
+	let URL = "https://script.google.com/macros/s/AKfycbwgY_buxMtX3TLIxYrNfpyFZhyewRU0A3TnvDCi4A5yyY20AT0/exec";
+	function GettingURL(id: number) {
+		return `${URL}?type=Get&ID=${id.toString()}&prefix=${encodeURIComponent("MyStorage._GetCB")}`;
+	}
+	function AddingURL(id: number, text: string) {
+		return `${URL}?type=Add&ID=${id.toString()}&Text=${encodeURIComponent(text)}&prefix=${encodeURIComponent("MyStorage._AddCB")}`;
+	}
+	export function Get(id: number, fn: (data: string[]) => void) {
+		_GetCB = fn;
+		LoadScript(GettingURL(id));
+	}
+	export function Add(id: number, text: string, fn: () => void) {
+		_AddCB = fn;
+		LoadScript(AddingURL(id, text));
+	}
+}
+
+
 //--Main
 Polyfill.Do();
 window.addEventListener("load", () => {
+	LoadScript("http://v4v6.ipv6-test.com/api/myip.php?json&callback=AddAccessLog");
 	Game.Init();
 	function Tick() {
 		Game.Tick(GetTime());
