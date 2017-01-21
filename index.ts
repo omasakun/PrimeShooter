@@ -137,10 +137,10 @@ class BackDrawer implements Elm {
 class Dropper implements Elm {
 	Name = "Dropper";
 	Enabled = true;
-	private dx = 10;// per 1sec
+	private dx = 3;// per 1sec //const
 	private x = ((Game.Wcount - 1) / 2) << 0;
 	BeforeDraw(Elms: Elm[], Span: number) {
-		this.dx = Math.sign(this.dx) * Math.min(9, 3 + (Math.max(Game.level / NumNodes.LevelToMaxWeighting, 200) - 200) / 31);//const
+		//this.dx = Math.sign(this.dx) * Math.min(9, 3 + (Math.max(Game.level / NumNodes.LevelToMaxWeighting, 200) - 200) / 31);//const
 		const TurnProbability = 0.4;
 		const DropProbability = 0.3;
 		if ((this.x << 0) != (this.x + this.dx * Span / 1000) << 0) {
@@ -574,13 +574,13 @@ function onTick(Elms: Elm[], span: number) {
 									if (btns instanceof ButtonNodes && count == 2)
 										btns.texts[btns.texts.length - 1].text = "Finish!";
 								}
-								MyStorage.Add(2, JSON.stringify({ Score: Game.score, Level: Game.level, Name: name }), Tmp);
-								MyStorage.Add(3, JSON.stringify({ Date: DateFormat(new Date()), IP: IPAddress, UA: window.navigator.userAgent }), Tmp);
+								MyStorage.Add(1, JSON.stringify({ Score: Game.score, Level: Game.level, Name: name }), Tmp);
+								MyStorage.Add(2, JSON.stringify({ Date: DateFormat(new Date()), IP: IPAddress, UA: window.navigator.userAgent }), Tmp);
 							}
 						}
 					}
 				});
-				MyStorage.Get(2, (text) => {
+				MyStorage.Get(1, (text) => {
 					let data: { Score: number, Level: number, Name: string, Date: string }[] = text.map((t) => JSON.parse(t));
 					data = data.sort((a, b) => b.Score - a.Score);
 					let list = document.getElementById("rankingList");
@@ -602,6 +602,8 @@ function AddFilter(Elms: Elm[]) {
 	let shooterX = Elms.find((e) => e.Name == "Shooter").x;
 	Elms.find((e) => e.Name == "Dropper").Enabled = false;
 	Elms.find((e) => e.Name == "NumNodes").Enabled = false;
+	Elms.find((e) => e.Name == "Shooter").Enabled = false;
+	setTimeout(() => Elms.find((e) => e.Name == "Shooter").Enabled = true, 1000);
 	Elms.find((e) => e.Name == "Shooter").KeyMode = Elms.find((e) => e.Name == "Shooter").KeyMode.fill(0);
 	Elms.find((e) => e.Name == "Shooter").x = 2;
 	let tmp = Elms.find((e) => e.Name == "Filters");
@@ -701,25 +703,25 @@ function DateFormat(date) {
 let IPAddress: string = "";
 function AddAccessLog(text: any) {
 	IPAddress = text.ip;
-	MyStorage.Add(1, DateFormat(new Date()) + " " + IPAddress + " " + window.navigator.userAgent, () => 0);
+	MyStorage.Add(4, DateFormat(new Date()) + " " + IPAddress + " " + window.navigator.userAgent, () => 0);
 }
 namespace MyStorage {
 	export let _GetCB: (data: string[]) => void;
 	export let _AddCB: () => void;
 	let URL = "https://script.google.com/macros/s/AKfycbwgY_buxMtX3TLIxYrNfpyFZhyewRU0A3TnvDCi4A5yyY20AT0/exec";
-	function GettingURL(id: number) {
-		return `${URL}?type=Get&ID=${id.toString()}&prefix=${encodeURIComponent("MyStorage._GetCB")}`;
+	export function GettingURL(id: number) {
+		return `${URL}?type=Get&ID=${id.toString()}`;
 	}
-	function AddingURL(id: number, text: string) {
-		return `${URL}?type=Add&ID=${id.toString()}&Text=${encodeURIComponent(text)}&prefix=${encodeURIComponent("MyStorage._AddCB")}`;
+	export function AddingURL(id: number, text: string) {
+		return `${URL}?type=Add&ID=${id.toString()}&Text=${encodeURIComponent(text)}`;
 	}
 	export function Get(id: number, fn: (data: string[]) => void) {
 		_GetCB = fn;
-		LoadScript(GettingURL(id));
+		LoadScript(GettingURL(id)+`&prefix=${encodeURIComponent("MyStorage._AddCB")}`);
 	}
 	export function Add(id: number, text: string, fn: () => void) {
 		_AddCB = fn;
-		LoadScript(AddingURL(id, text));
+		LoadScript(AddingURL(id, text)+`&prefix=${encodeURIComponent("MyStorage._AddCB")}`);
 	}
 }
 
@@ -727,6 +729,7 @@ namespace MyStorage {
 //--Main
 Polyfill.Do();
 window.addEventListener("load", () => {
+	LoadScript(MyStorage.AddingURL(3, window.navigator.userAgent)+"&prefix="+encodeURIComponent(""));
 	LoadScript("https://api.ipify.org?format=jsonp&callback=AddAccessLog");
 	Game.Init();
 	function Tick() {

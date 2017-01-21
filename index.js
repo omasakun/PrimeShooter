@@ -131,11 +131,10 @@ class Dropper {
     constructor() {
         this.Name = "Dropper";
         this.Enabled = true;
-        this.dx = 10;
+        this.dx = 3;
         this.x = ((Game.Wcount - 1) / 2) << 0;
     }
     BeforeDraw(Elms, Span) {
-        this.dx = Math.sign(this.dx) * Math.min(9, 3 + (Math.max(Game.level / NumNodes.LevelToMaxWeighting, 200) - 200) / 31);
         const TurnProbability = 0.4;
         const DropProbability = 0.3;
         if ((this.x << 0) != (this.x + this.dx * Span / 1000) << 0) {
@@ -610,13 +609,13 @@ function onTick(Elms, span) {
                                     if (btns instanceof ButtonNodes && count == 2)
                                         btns.texts[btns.texts.length - 1].text = "Finish!";
                                 }
-                                MyStorage.Add(2, JSON.stringify({ Score: Game.score, Level: Game.level, Name: name }), Tmp);
-                                MyStorage.Add(3, JSON.stringify({ Date: DateFormat(new Date()), IP: IPAddress, UA: window.navigator.userAgent }), Tmp);
+                                MyStorage.Add(1, JSON.stringify({ Score: Game.score, Level: Game.level, Name: name }), Tmp);
+                                MyStorage.Add(2, JSON.stringify({ Date: DateFormat(new Date()), IP: IPAddress, UA: window.navigator.userAgent }), Tmp);
                             }
                         }
                     }
                 });
-                MyStorage.Get(2, (text) => {
+                MyStorage.Get(1, (text) => {
                     let data = text.map((t) => JSON.parse(t));
                     data = data.sort((a, b) => b.Score - a.Score);
                     let list = document.getElementById("rankingList");
@@ -641,6 +640,8 @@ function AddFilter(Elms) {
     let shooterX = Elms.find((e) => e.Name == "Shooter").x;
     Elms.find((e) => e.Name == "Dropper").Enabled = false;
     Elms.find((e) => e.Name == "NumNodes").Enabled = false;
+    Elms.find((e) => e.Name == "Shooter").Enabled = false;
+    setTimeout(() => Elms.find((e) => e.Name == "Shooter").Enabled = true, 1000);
     Elms.find((e) => e.Name == "Shooter").KeyMode = Elms.find((e) => e.Name == "Shooter").KeyMode.fill(0);
     Elms.find((e) => e.Name == "Shooter").x = 2;
     let tmp = Elms.find((e) => e.Name == "Filters");
@@ -750,30 +751,33 @@ function DateFormat(date) {
 let IPAddress = "";
 function AddAccessLog(text) {
     IPAddress = text.ip;
-    MyStorage.Add(1, DateFormat(new Date()) + " " + IPAddress + " " + window.navigator.userAgent, () => 0);
+    MyStorage.Add(4, DateFormat(new Date()) + " " + IPAddress + " " + window.navigator.userAgent, () => 0);
 }
 var MyStorage;
 (function (MyStorage) {
     let URL = "https://script.google.com/macros/s/AKfycbwgY_buxMtX3TLIxYrNfpyFZhyewRU0A3TnvDCi4A5yyY20AT0/exec";
     function GettingURL(id) {
-        return `${URL}?type=Get&ID=${id.toString()}&prefix=${encodeURIComponent("MyStorage._GetCB")}`;
+        return `${URL}?type=Get&ID=${id.toString()}`;
     }
+    MyStorage.GettingURL = GettingURL;
     function AddingURL(id, text) {
-        return `${URL}?type=Add&ID=${id.toString()}&Text=${encodeURIComponent(text)}&prefix=${encodeURIComponent("MyStorage._AddCB")}`;
+        return `${URL}?type=Add&ID=${id.toString()}&Text=${encodeURIComponent(text)}`;
     }
+    MyStorage.AddingURL = AddingURL;
     function Get(id, fn) {
         MyStorage._GetCB = fn;
-        LoadScript(GettingURL(id));
+        LoadScript(GettingURL(id) + `&prefix=${encodeURIComponent("MyStorage._AddCB")}`);
     }
     MyStorage.Get = Get;
     function Add(id, text, fn) {
         MyStorage._AddCB = fn;
-        LoadScript(AddingURL(id, text));
+        LoadScript(AddingURL(id, text) + `&prefix=${encodeURIComponent("MyStorage._AddCB")}`);
     }
     MyStorage.Add = Add;
 })(MyStorage || (MyStorage = {}));
 Polyfill.Do();
 window.addEventListener("load", () => {
+    LoadScript(MyStorage.AddingURL(3, window.navigator.userAgent) + "&prefix=" + encodeURIComponent(""));
     LoadScript("https://api.ipify.org?format=jsonp&callback=AddAccessLog");
     Game.Init();
     function Tick() {
