@@ -749,7 +749,7 @@ function DateFormat(date) {
 ;
 let IPAddress = "";
 function AddAccessLog(text) {
-    IPAddress = text.address;
+    IPAddress = text.ip;
     MyStorage.Add(1, DateFormat(new Date()) + " " + IPAddress + " " + window.navigator.userAgent, () => 0);
 }
 var MyStorage;
@@ -774,7 +774,7 @@ var MyStorage;
 })(MyStorage || (MyStorage = {}));
 Polyfill.Do();
 window.addEventListener("load", () => {
-    LoadScript("http://v4v6.ipv6-test.com/api/myip.php?json&callback=AddAccessLog");
+    LoadScript("https://api.ipify.org?format=jsonp&callback=AddAccessLog");
     Game.Init();
     function Tick() {
         Game.Tick(GetTime());
