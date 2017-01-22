@@ -1,3 +1,4 @@
+//TODO: 間違えたときにそれが残って表示される
 let Colors = {
 	Back: "#000",//#FFF
 	Border: "#222",//#757575
@@ -5,6 +6,7 @@ let Colors = {
 	Beam: "#F00",
 	Text: "#CCC",
 	Node: ["#333", "#242", "#422"],
+	AfterImage:"#F00",
 	Filter: "#5F2",
 	Shooter: "#888",
 	Dropper: "#555",
@@ -23,6 +25,9 @@ let Settings = {
 	},
 	Dropper: {
 		MoveSpeed: 3,// cellWidth/second
+		SpeedUpLevel: 300,
+		SpeedUpSpeed: 31,// 1/(1LevelあたりのSpeed upの量)
+		MaxSpeed: 9,
 		TurnProbability: 0.4,// 線を超えるごとに
 		DropProbability: 0.2,// 線を超えるごとに
 		Color: Colors.Dropper
@@ -50,6 +55,11 @@ let Settings = {
 		MaxFactCount: 6,
 		MoveSpeed: 0.01,//cellHeight/tick
 		TextColor: Colors.Text,
+	},
+	AfterImages: {
+		ShowTicks: 100,
+		MaxAlpha: 0.7,
+		Color:Colors.AfterImage
 	},
 	Filters: {
 		Color: Colors.Filter,
@@ -244,8 +254,7 @@ class BackDrawer implements Elm {
 		c.TextLeft("Life:  " + Game.life.toString(), Settings.BackDrawer.MarginLeft * Settings.Game.Wcell, Settings.Game.Hcell * (Settings.Game.Hcount - 2 + 0.5), Settings.Game.Wcell * Settings.Game.Wcount / 2);
 		c.TextLeft("Score: " + Game.score.toString(), Settings.BackDrawer.MarginLeft * Settings.Game.Wcell, Settings.Game.Hcell * (Settings.Game.Hcount - 1 + 0.5), Settings.Game.Wcell * Settings.Game.Wcount / 2);
 		c.TextRight("Hint: " + Game.hintCount.toString(), (Settings.Game.Wcount - Settings.BackDrawer.MarginRight) * Settings.Game.Wcell, Settings.Game.Hcell * (Settings.Game.Hcount - 1 + 0.5), Settings.Game.Wcell * Settings.Game.Wcount / 2);
-		let lvText = (Game.level % Settings.NumNodes.LevelToMaxWeighting == 0 ? (Game.level / Settings.NumNodes.LevelToMaxWeighting).toString() : Game.level.toString() + "÷" + Settings.NumNodes.LevelToMaxWeighting.toString());
-		c.TextRight("Lv." + lvText, (Settings.Game.Wcount - Settings.BackDrawer.MarginRight) * Settings.Game.Wcell, Settings.Game.Hcell * (Settings.Game.Hcount - 2 + 0.5), Settings.Game.Wcell * Settings.Game.Wcount / 2);
+		c.TextRight("Lv." + Game.GetLevelText(), (Settings.Game.Wcount - Settings.BackDrawer.MarginRight) * Settings.Game.Wcell, Settings.Game.Hcell * (Settings.Game.Hcount - 2 + 0.5), Settings.Game.Wcell * Settings.Game.Wcount / 2);
 	}
 }//Name:Back
 class Dropper implements Elm {
@@ -254,7 +263,7 @@ class Dropper implements Elm {
 	private dx = Settings.Dropper.MoveSpeed;// per 1sec
 	private x = ((Settings.Game.Wcount - 1) / 2) << 0;
 	BeforeDraw(Elms: Elm[], Span: number) {
-		//this.dx = Math.sign(this.dx) * Math.min(9, 3 + (Math.max(Game.level / Settings.NumNodes.LevelToMaxWeighting, 200) - 200) / 31);
+		this.dx = Math.sign(this.dx) * Math.min(Settings.Dropper.MaxSpeed, Settings.Dropper.MoveSpeed + (Math.max(Game.level / Settings.NumNodes.LevelToMaxWeighting, Settings.Dropper.SpeedUpLevel) - Settings.Dropper.SpeedUpLevel) / Settings.Dropper.SpeedUpSpeed);
 		if ((this.x << 0) != (this.x + this.dx * Span / 1000) << 0) {
 			this.x = (this.x + this.dx * Span / 1000);
 			if (Math.random() < Settings.Dropper.TurnProbability)
@@ -450,10 +459,35 @@ class NumNodes implements Elm {
 		this.nums = this.nums.filter((num) => {
 			if (num[1] <= Settings.Game.Hcount - 3) return true;
 			Settings.ScoreAndLevel(1, num[2]);
+			if (Factorization(num[2])[0] != 0)
+			Elms.find((e) => e.Name == "AfterImages").Add(num[0],num[1],num[2]);	
 			return false;
 		});
 	}
 }//Name: NumNodes
+class AfterImages implements Elm {
+	Name = "AfterImages";
+	Enabled = true;
+	nums: [number, number, number, number][] = [];//x,y,num,CountDown
+	Add(x: number, y: number, num: number) {
+		this.nums.push([x, y, num, Settings.AfterImages.ShowTicks]);
+	}
+	Draw(c: ResizingCanvas, Span: number) {
+		this.nums.forEach((v) => v[3] -= 1);
+		c.ctx.save();
+		c.ctx.fillStyle = Settings.AfterImages.Color;
+		c.ctx.font = `${c.S(Settings.Game.Hcell - 4) << 0}px ${Settings.Game.FontName}`;
+		this.nums.forEach((v) => {
+			c.ctx.globalCompositeOperation = "lighter";
+			c.ctx.globalAlpha = Settings.AfterImages.MaxAlpha * (v[3] / Settings.AfterImages.ShowTicks);
+			c.TextCenter(v[2].toString(), (v[0] + 0.5) * Settings.Game.Wcell, (v[1] + 0.5) * Settings.Game.Hcell, Settings.Game.Wcell - 4);
+		});
+		c.ctx.restore();
+	}
+	AfterDraw(Elms: Elm[], Span: number) {
+		this.nums = this.nums.filter((num) => num[3] > 0);
+	}
+}//Name: AfterImages
 class Filters implements Elm {
 	Name = "Filters";
 	Enabled = true;
@@ -539,6 +573,8 @@ function OnhitNumShots(num: NumNodes, shots: Shots, span: number) {
 		if (tmp[0] != 0) {//Not Prime number
 			num.Add((num.nums[index][0] + Settings.Game.Wcount - 1) % Settings.Game.Wcount, num.nums[index][1] - 1, tmp[0]);
 			num.Add((num.nums[index][0] + Settings.Game.Wcount + 1) % Settings.Game.Wcount, num.nums[index][1] - 1, tmp[1]);
+		} else {
+			Game.Elms.find((e) => e.Name == "AfterImages").Add(num.nums[index][0],num.nums[index][1],num.nums[index][2]);
 		}
 		num.nums.splice(index, 1);
 	}
@@ -676,7 +712,7 @@ function onTick(Elms: Elm[], span: number) {
 					let list = document.getElementById("rankingList");
 					list.innerHTML = "";
 					data.forEach((v, i) => {
-						list.innerHTML += `<li><div>#${i + 1}</div><div>${v["Score"]}pt</div><div>Lv.${(v["Level"] % Settings.NumNodes.LevelToMaxWeighting == 0 ? (v["Level"] / Settings.NumNodes.LevelToMaxWeighting).toString() : Game["level"].toString() + "÷" + Settings.NumNodes.LevelToMaxWeighting.toString())}</div><div>${v["Name"]}</div></li>`;
+						list.innerHTML += `<li><div>#${i + 1}</div><div>${v["Score"]}pt</div><div>Lv.${Game.GetLevelText(v["Level"])}</div><div>${v["Name"]}</div></li>`;
 					});
 					let rank = data.findIndex((v) => v["Score"] <= Game.score) + 1;
 					if (rank == 0) rank = data.length + 1;
@@ -731,7 +767,7 @@ namespace Game {
 	export let life = Settings.Game.life;
 	export let hintCount = 0;
 	let c1: ResizingCanvas;
-	let Elms: Elm[] = [new BackDrawer(), new Dropper(), new Shooter().Init(), new Shots(), new NumNodes(), new Filters(), new ButtonNodes(), new Fading()];
+	export let Elms: Elm[] = [new BackDrawer(), new Dropper(), new Shooter().Init(), new Shots(), new NumNodes(), new Filters(),new AfterImages(), new ButtonNodes(), new Fading()];
 	let OnHit: { Fn: (Elm1: Elm, Elm2: Elm, Span: number) => void, Elm1: string, Elm2: string }[] = [
 		{ Fn: OnhitBtnShots, Elm1: "ButtonNodes", Elm2: "Shots" },
 		{ Fn: OnhitNumShots, Elm1: "NumNodes", Elm2: "Shots" },
@@ -766,6 +802,14 @@ namespace Game {
 		});
 		prevTime = pt;
 		onTick(Elms, pt - prevTime);
+	}
+	export function GetLevelText(Level = level): string {
+		if (Level % Settings.NumNodes.LevelToMaxWeighting == 0)
+			return Level.toString();
+		else if (Level < Settings.NumNodes.LevelToMaxWeighting)
+			return Level + "/" + Settings.NumNodes.LevelToMaxWeighting;
+		else
+			return ((Level / Settings.NumNodes.LevelToMaxWeighting) << 0) + "+" + (Level % Settings.NumNodes.LevelToMaxWeighting) + "/" + Settings.NumNodes.LevelToMaxWeighting;
 	}
 }
 
