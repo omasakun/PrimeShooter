@@ -269,9 +269,9 @@ class Dropper {
             if (Math.random() < Settings.Dropper.DropProbability) {
                 let numnode = Elms.find((v) => v.Name == "NumNodes");
                 if (numnode instanceof NumNodes) {
-                    if (numnode.nums.some((v) => v[0] == Math.round(this.x + Settings.Game.Wcell) % Settings.Game.Wcell && v[1] < 1))
+                    if (numnode.nums.some((v) => v[0] == Math.round(this.x + Settings.Game.Wcount) % Settings.Game.Wcount && v[1] < 1))
                         return;
-                    numnode.Add(Math.round(this.x + Settings.Game.Wcell) % Settings.Game.Wcell, 0);
+                    numnode.Add(Math.round(this.x + Settings.Game.Wcount) % Settings.Game.Wcount, 0);
                 }
                 else
                     throw "ERROR";
@@ -341,7 +341,7 @@ class Shooter {
                         this.dx = Settings.Shotter.MoveSpeed;
                         break;
                     case 2:
-                        Elms.find((v) => v.Name == "Shots").Add(Math.round(this.x + Settings.Game.Wcell) % Settings.Game.Wcell, this.y);
+                        Elms.find((v) => v.Name == "Shots").Add(Math.round(this.x + Settings.Game.Wcount) % Settings.Game.Wcount, this.y);
                         break;
                     case 3:
                         Elms.find((v) => v.Name == "NumNodes").Hint();
