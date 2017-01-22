@@ -5,7 +5,8 @@ let Colors = {
     Beam: "#F00",
     Text: "#CCC",
     Node: ["#333", "#242", "#422"],
-    AfterImage: "#F00",
+    AfterImageFore: "#FF0",
+    AfterImageBack: "#800",
     Filter: "#5F2",
     Shooter: "#888",
     Dropper: "#555",
@@ -58,7 +59,8 @@ let Settings = {
     AfterImages: {
         ShowTicks: 100,
         MaxAlpha: 0.7,
-        Color: Colors.AfterImage
+        Fore: Colors.AfterImageFore,
+        Back: Colors.AfterImageBack
     },
     Filters: {
         Color: Colors.Filter,
@@ -494,10 +496,17 @@ class AfterImages {
     Draw(c, Span) {
         this.nums.forEach((v) => v[3] -= 1);
         c.ctx.save();
-        c.ctx.fillStyle = Settings.AfterImages.Color;
+        c.ctx.globalCompositeOperation = "lighter";
+        c.ctx.fillStyle = Settings.AfterImages.Back;
+        this.nums.forEach((v) => {
+            c.ctx.globalAlpha = Settings.AfterImages.MaxAlpha * (v[3] / Settings.AfterImages.ShowTicks);
+            c.RoundedRect(v[0] * Settings.Game.Wcell, v[1] * Settings.Game.Hcell, Settings.Game.Wcell - 1, Settings.Game.Hcell, Settings.Game.Rcell);
+            c.ctx.closePath();
+            c.ctx.fill();
+        });
+        c.ctx.fillStyle = Settings.AfterImages.Fore;
         c.ctx.font = `${c.S(Settings.Game.Hcell - 4) << 0}px ${Settings.Game.FontName}`;
         this.nums.forEach((v) => {
-            c.ctx.globalCompositeOperation = "lighter";
             c.ctx.globalAlpha = Settings.AfterImages.MaxAlpha * (v[3] / Settings.AfterImages.ShowTicks);
             c.TextCenter(v[2].toString(), (v[0] + 0.5) * Settings.Game.Wcell, (v[1] + 0.5) * Settings.Game.Hcell, Settings.Game.Wcell - 4);
         });

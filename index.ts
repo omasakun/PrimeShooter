@@ -6,7 +6,8 @@ let Colors = {
 	Beam: "#F00",
 	Text: "#CCC",
 	Node: ["#333", "#242", "#422"],
-	AfterImage:"#F00",
+	AfterImageFore: "#FF0",
+	AfterImageBack: "#800",
 	Filter: "#5F2",
 	Shooter: "#888",
 	Dropper: "#555",
@@ -59,7 +60,8 @@ let Settings = {
 	AfterImages: {
 		ShowTicks: 100,
 		MaxAlpha: 0.7,
-		Color:Colors.AfterImage
+		Fore: Colors.AfterImageFore,
+		Back: Colors.AfterImageBack
 	},
 	Filters: {
 		Color: Colors.Filter,
@@ -460,7 +462,7 @@ class NumNodes implements Elm {
 			if (num[1] <= Settings.Game.Hcount - 3) return true;
 			Settings.ScoreAndLevel(1, num[2]);
 			if (Factorization(num[2])[0] != 0)
-			Elms.find((e) => e.Name == "AfterImages").Add(num[0],num[1],num[2]);	
+				Elms.find((e) => e.Name == "AfterImages").Add(num[0], num[1], num[2]);
 			return false;
 		});
 	}
@@ -475,10 +477,17 @@ class AfterImages implements Elm {
 	Draw(c: ResizingCanvas, Span: number) {
 		this.nums.forEach((v) => v[3] -= 1);
 		c.ctx.save();
-		c.ctx.fillStyle = Settings.AfterImages.Color;
+		c.ctx.globalCompositeOperation = "lighter";
+		c.ctx.fillStyle = Settings.AfterImages.Back;
+		this.nums.forEach((v) => {
+			c.ctx.globalAlpha = Settings.AfterImages.MaxAlpha * (v[3] / Settings.AfterImages.ShowTicks);
+			c.RoundedRect(v[0] * Settings.Game.Wcell, v[1] * Settings.Game.Hcell, Settings.Game.Wcell - 1, Settings.Game.Hcell, Settings.Game.Rcell);
+			c.ctx.closePath();
+			c.ctx.fill();
+		});
+		c.ctx.fillStyle = Settings.AfterImages.Fore;
 		c.ctx.font = `${c.S(Settings.Game.Hcell - 4) << 0}px ${Settings.Game.FontName}`;
 		this.nums.forEach((v) => {
-			c.ctx.globalCompositeOperation = "lighter";
 			c.ctx.globalAlpha = Settings.AfterImages.MaxAlpha * (v[3] / Settings.AfterImages.ShowTicks);
 			c.TextCenter(v[2].toString(), (v[0] + 0.5) * Settings.Game.Wcell, (v[1] + 0.5) * Settings.Game.Hcell, Settings.Game.Wcell - 4);
 		});
@@ -574,7 +583,7 @@ function OnhitNumShots(num: NumNodes, shots: Shots, span: number) {
 			num.Add((num.nums[index][0] + Settings.Game.Wcount - 1) % Settings.Game.Wcount, num.nums[index][1] - 1, tmp[0]);
 			num.Add((num.nums[index][0] + Settings.Game.Wcount + 1) % Settings.Game.Wcount, num.nums[index][1] - 1, tmp[1]);
 		} else {
-			Game.Elms.find((e) => e.Name == "AfterImages").Add(num.nums[index][0],num.nums[index][1],num.nums[index][2]);
+			Game.Elms.find((e) => e.Name == "AfterImages").Add(num.nums[index][0], num.nums[index][1], num.nums[index][2]);
 		}
 		num.nums.splice(index, 1);
 	}
@@ -767,7 +776,7 @@ namespace Game {
 	export let life = Settings.Game.life;
 	export let hintCount = 0;
 	let c1: ResizingCanvas;
-	export let Elms: Elm[] = [new BackDrawer(), new Dropper(), new Shooter().Init(), new Shots(), new NumNodes(), new Filters(),new AfterImages(), new ButtonNodes(), new Fading()];
+	export let Elms: Elm[] = [new BackDrawer(), new Dropper(), new Shooter().Init(), new Shots(), new NumNodes(), new Filters(), new AfterImages(), new ButtonNodes(), new Fading()];
 	let OnHit: { Fn: (Elm1: Elm, Elm2: Elm, Span: number) => void, Elm1: string, Elm2: string }[] = [
 		{ Fn: OnhitBtnShots, Elm1: "ButtonNodes", Elm2: "Shots" },
 		{ Fn: OnhitNumShots, Elm1: "NumNodes", Elm2: "Shots" },
