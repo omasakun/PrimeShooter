@@ -1,8 +1,23 @@
+let Colors = {
+	Back: "#000",//#FFF
+	Border: "#222",//#757575
+	UI: "#777",
+	Beam: "#F00",
+	Text: "#CCC",
+	Node: ["#333", "#242", "#422"],
+	Filter: "#5F2",
+	Shooter: "#888",
+	Dropper: "#555",
+	Shot: "#CCC",
+	ShadowX: 0,
+	ShadowY: 3,
+	ShadowR: 5
+}
 let Settings = {
 	BackDrawer: {
-		Background: "#333",
-		Border: "#CCC",
-		TextColor: "#333",
+		Background: Colors.Back,
+		Border: Colors.Border,
+		TextColor: Colors.UI,
 		MarginLeft: 0.5,
 		MarginRight: 0.5
 	},
@@ -10,42 +25,42 @@ let Settings = {
 		MoveSpeed: 3,// cellWidth/second
 		TurnProbability: 0.4,// 線を超えるごとに
 		DropProbability: 0.2,// 線を超えるごとに
-		Color: "#EEE"
+		Color: Colors.Dropper
 	},
 	Shotter: {
 		Beam: {
 			BlinkSpeed: 100,// tick/count
-			Color: "#F00"
+			Color: Colors.Beam
 		},
 		Y: 28, //cellHeight
 		MoveSpeed: 0.5,//cellWidth/tick
-		Color: "#EEE",
+		Color: Colors.Shooter,
 		Keymap: [37, 39, 38, 72],//Left Right Shot Help
 		KeySleepMax1: [9, 9, 9, Infinity],
 		KeySleepMax2: [6, 6, 3, Infinity]
 	},
 	Shots: {
 		Radius: 0.2,
-		Color: "#EEE",
+		Color: Colors.Shot,
 		MoveSpeed: 0.3//cellHeight/tick
 	},
 	NumNodes: {
 		LevelToMaxWeighting: 7,//Level/MaxNumber
-		Colors: ["#EEE", "#DFD", "#FDD"],//Default PrimeNumber CompositeNumber
+		Colors: Colors.Node,//Default PrimeNumber CompositeNumber
 		MaxFactCount: 6,
 		MoveSpeed: 0.01,//cellHeight/tick
-		TextColor: "#333",
+		TextColor: Colors.Text,
 	},
 	Filters: {
-		Color: "#5F2",
+		Color: Colors.Filter,
 	},
 	ButtonNodes: {
-		Color: "#EEE",
-		TextColor: "#333"
+		Color: Colors.Node[0],
+		TextColor: Colors.Text
 	},
 	Fading: {
 		Speed: 100,//count/tick
-		Color: "#000"
+		Color: Colors.Back
 	},
 	onTick: {
 		HintperLevel: 13,
@@ -62,15 +77,15 @@ let Settings = {
 	},
 	ResizingCanvas: {
 		Margin: 10,
-		shadowBlur: 5,
+		shadowBlur: Colors.ShadowR,
 		shadowColor: "#000",
-		shadowOffsetX: 2,
-		shadowOffsetY: 3
+		shadowOffsetX: Colors.ShadowX,
+		shadowOffsetY: Colors.ShadowY
 	},
 	ScoreAndLevel: (Type: number, Num: number) => {
 		let IsPrime = Factorization(Num)[0] == 0;
 		switch (Type) {
-			case 0://SOSUUBar
+			case 0://Filter
 				Game.score += 7 * Num;
 				Game.level += 7;
 				break;
@@ -91,7 +106,7 @@ let Settings = {
 					Game.life -= 3;
 				} else {
 					Game.score += Num;
-					Game.level -= 7;
+					Game.level++;
 				}
 				break;
 		}
@@ -200,7 +215,7 @@ class ResizingCanvas {
 		this.ctx.fillText(Text, this.S(x), this.S(y), this.S(w));
 	}
 	Shadow() {
-		this.ctx.shadowBlur =this.S(Settings.ResizingCanvas.shadowBlur);
+		this.ctx.shadowBlur = this.S(Settings.ResizingCanvas.shadowBlur);
 		this.ctx.shadowColor = Settings.ResizingCanvas.shadowColor;
 		this.ctx.shadowOffsetX = this.S(Settings.ResizingCanvas.shadowOffsetX);
 		this.ctx.shadowOffsetY = this.S(Settings.ResizingCanvas.shadowOffsetY);
@@ -649,7 +664,7 @@ function onTick(Elms: Elm[], span: number) {
 									if (btns instanceof ButtonNodes && count == 2)
 										btns.texts[btns.texts.length - 1].text = "Finish!";
 								}
-								MyStorage.Add(1, JSON.stringify({ "Score": Game.score, "Level": Game.level,"Name": name }), Tmp);
+								MyStorage.Add(1, JSON.stringify({ "Score": Game.score, "Level": Game.level, "Name": name }), Tmp);
 								MyStorage.Add(2, JSON.stringify({ "Date": DateFormat(new Date()), "IP": IPAddress, "UA": window.navigator.userAgent }), Tmp);
 							}
 						}
@@ -691,16 +706,16 @@ function AddFilter(Elms: Elm[]) {
 		btns.Add(1, Settings.Game.Hcount - 9, 1, 2, "↑", 1.5, () => {
 			let tmp = Elms.find((e) => e.Name == "Filters");
 			if (tmp instanceof Filters) {
-				tmp.filters[tmp.filters.length - 1] = Math.min(Settings.Game.Hcount - 5, Math.max(2, tmp.filters[tmp.filters.length - 1] - 1));
+				tmp.filters[tmp.filters.length - 1] = Math.min(Settings.Game.Hcount - 5, Math.max(1, tmp.filters[tmp.filters.length - 1] - 1));
 			}
 		});
 		btns.Add(2, Settings.Game.Hcount - 9, 1, 2, "↓", 1.5, () => {
 			let tmp = Elms.find((e) => e.Name == "Filters");
 			if (tmp instanceof Filters) {
-				tmp.filters[tmp.filters.length - 1] = Math.min(Settings.Game.Hcount - 5, Math.max(2, tmp.filters[tmp.filters.length - 1] + 1));
+				tmp.filters[tmp.filters.length - 1] = Math.min(Settings.Game.Hcount - 5, Math.max(1, tmp.filters[tmp.filters.length - 1] + 1));
 			}
 		});
-		btns.Add(3, Settings.Game.Hcount - 9, Settings.Game.Wcount - 4, 2, "Enter&Start", 1.5, () => {
+		btns.Add(3, Settings.Game.Hcount - 9, Settings.Game.Wcount - 4, 2, "Add & Start", 1.5, () => {
 			Elms.find((e) => e.Name == "Dropper").Enabled = true;
 			Elms.find((e) => e.Name == "NumNodes").Enabled = true;
 			Elms.find((e) => e.Name == "ButtonNodes").Enabled = false;
@@ -788,7 +803,7 @@ namespace MyStorage {
 		LoadScript(GettingURL(id) + `&prefix=${encodeURIComponent("MyStorage._GetCB")}`);
 	}
 	export function Add(id: number, text: string, fn: () => void) {
-		MyStorage["_AddCB"]  = fn;
+		MyStorage["_AddCB"] = fn;
 		LoadScript(AddingURL(id, text) + `&prefix=${encodeURIComponent("MyStorage._AddCB")}`);
 	}
 }

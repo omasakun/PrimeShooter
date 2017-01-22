@@ -15,7 +15,7 @@
 		div {
 			padding: 0;
 			margin: 0;
-			color: #EEE;
+			color: #CCC;
 			/*overflow: hidden;*/
 		}
 		
@@ -24,15 +24,19 @@
 			-moz-user-select: none;
 			-ms-user-select: none;
 			user-select: none;
-			background-color: #333;
+			background-color: #111;
 			text-align: center;
 			display: flex;
 			justify-content: center;
 			flex-wrap: wrap;
 		}
 		
+		canvas {
+			box-shadow: 0 0 10px #555;
+		}
+		
 		#help {
-			text-shadow: 0 0 3px #000, 0 0 10px #000;
+			text-shadow: 0 0 3px #AAA, 0 0 10px #555;
 			max-width: 30em;
 			text-align: start;
 			line-height: 2em;
@@ -40,16 +44,20 @@
 			max-height: calc(100vh - 1em);
 			overflow: auto;
 		}
-		#rankingList{
+		
+		#rankingList {
 			text-align: start;
 		}
+		
 		#rankingList>* {
 			display: block;
 		}
+		
 		#rankingList>*>* {
 			display: inline;
 			min-width: 3em;
 		}
+		
 		#rankingList>*>*:not(:first-child) {
 			margin-left: 1em;
 		}
@@ -62,7 +70,6 @@
 
 <body>
 	<div id="message">Loading...</div>
-	<canvas id="c1"></canvas>
 	<div id="help" class="hide">
 		<h2>1.前文</h2>
 		<p>
@@ -92,7 +99,22 @@
 		<p>
 			<br>&emsp;このゲームは、そんな神父によって作られたトレーニングツールだ。まずは直感を鍛えることから始まる。素数を一瞬で見分けよ、あなたは「変人」として慕われ、周りからも距離を置かれた存在になれることであろう!
 		</p>
+		<h2>3.都？いいから点数計算が正しいか調べさせろよ</h2>
+		<p>
+			かしこまりました。点数計算については以下のとおりです。戦略を決める際にでもお使いください。
+			<ul>
+				<li>Filterによって素数Nが消される: +1(lv) +7N(pt)</li>
+				<li>合成数Nを打つ: +1/7(Lv) +N(Pt)</li>
+				<li>素数Nを打つ: -31/7(Lv) -31N(Pt) -3(Life)</li>
+				<li>合成数Nが下まで落ちる: +11/7(Lv) +11N(Pt)</li>
+				<li>素数Nが下まで落ちる: -17/7(Lv) -17N(Pt) -1(Life)</li>
+				<li>13lv上がるごとに: +1(Help)</li>
+				<li>97Lv上がるごとに: +1(Filter)</li>
+			</ul>
+			もうわかりましたか? 7,11,13,17,31,97・・・そうです！素数です！素数万歳！
+		</p>
 	</div>
+	<canvas id="c1"></canvas>
 	<div id="ranking" class="hide">
 		<ul id="rankingList">
 		</ul>

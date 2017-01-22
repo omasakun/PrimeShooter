@@ -1,8 +1,23 @@
+let Colors = {
+    Back: "#000",
+    Border: "#222",
+    UI: "#777",
+    Beam: "#F00",
+    Text: "#CCC",
+    Node: ["#333", "#242", "#422"],
+    Filter: "#5F2",
+    Shooter: "#888",
+    Dropper: "#555",
+    Shot: "#CCC",
+    ShadowX: 0,
+    ShadowY: 3,
+    ShadowR: 5
+};
 let Settings = {
     BackDrawer: {
-        Background: "#333",
-        Border: "#CCC",
-        TextColor: "#333",
+        Background: Colors.Back,
+        Border: Colors.Border,
+        TextColor: Colors.UI,
         MarginLeft: 0.5,
         MarginRight: 0.5
     },
@@ -10,42 +25,42 @@ let Settings = {
         MoveSpeed: 3,
         TurnProbability: 0.4,
         DropProbability: 0.2,
-        Color: "#EEE"
+        Color: Colors.Dropper
     },
     Shotter: {
         Beam: {
             BlinkSpeed: 100,
-            Color: "#F00"
+            Color: Colors.Beam
         },
         Y: 28,
         MoveSpeed: 0.5,
-        Color: "#EEE",
+        Color: Colors.Shooter,
         Keymap: [37, 39, 38, 72],
         KeySleepMax1: [9, 9, 9, Infinity],
         KeySleepMax2: [6, 6, 3, Infinity]
     },
     Shots: {
         Radius: 0.2,
-        Color: "#EEE",
+        Color: Colors.Shot,
         MoveSpeed: 0.3
     },
     NumNodes: {
         LevelToMaxWeighting: 7,
-        Colors: ["#EEE", "#DFD", "#FDD"],
+        Colors: Colors.Node,
         MaxFactCount: 6,
         MoveSpeed: 0.01,
-        TextColor: "#333",
+        TextColor: Colors.Text,
     },
     Filters: {
-        Color: "#5F2",
+        Color: Colors.Filter,
     },
     ButtonNodes: {
-        Color: "#EEE",
-        TextColor: "#333"
+        Color: Colors.Node[0],
+        TextColor: Colors.Text
     },
     Fading: {
         Speed: 100,
-        Color: "#000"
+        Color: Colors.Back
     },
     onTick: {
         HintperLevel: 13,
@@ -62,10 +77,10 @@ let Settings = {
     },
     ResizingCanvas: {
         Margin: 10,
-        shadowBlur: 5,
+        shadowBlur: Colors.ShadowR,
         shadowColor: "#000",
-        shadowOffsetX: 2,
-        shadowOffsetY: 3
+        shadowOffsetX: Colors.ShadowX,
+        shadowOffsetY: Colors.ShadowY
     },
     ScoreAndLevel: (Type, Num) => {
         let IsPrime = Factorization(Num)[0] == 0;
@@ -93,7 +108,7 @@ let Settings = {
                 }
                 else {
                     Game.score += Num;
-                    Game.level -= 7;
+                    Game.level++;
                 }
                 break;
         }
@@ -730,16 +745,16 @@ function AddFilter(Elms) {
         btns.Add(1, Settings.Game.Hcount - 9, 1, 2, "↑", 1.5, () => {
             let tmp = Elms.find((e) => e.Name == "Filters");
             if (tmp instanceof Filters) {
-                tmp.filters[tmp.filters.length - 1] = Math.min(Settings.Game.Hcount - 5, Math.max(2, tmp.filters[tmp.filters.length - 1] - 1));
+                tmp.filters[tmp.filters.length - 1] = Math.min(Settings.Game.Hcount - 5, Math.max(1, tmp.filters[tmp.filters.length - 1] - 1));
             }
         });
         btns.Add(2, Settings.Game.Hcount - 9, 1, 2, "↓", 1.5, () => {
             let tmp = Elms.find((e) => e.Name == "Filters");
             if (tmp instanceof Filters) {
-                tmp.filters[tmp.filters.length - 1] = Math.min(Settings.Game.Hcount - 5, Math.max(2, tmp.filters[tmp.filters.length - 1] + 1));
+                tmp.filters[tmp.filters.length - 1] = Math.min(Settings.Game.Hcount - 5, Math.max(1, tmp.filters[tmp.filters.length - 1] + 1));
             }
         });
-        btns.Add(3, Settings.Game.Hcount - 9, Settings.Game.Wcount - 4, 2, "Enter&Start", 1.5, () => {
+        btns.Add(3, Settings.Game.Hcount - 9, Settings.Game.Wcount - 4, 2, "Add & Start", 1.5, () => {
             Elms.find((e) => e.Name == "Dropper").Enabled = true;
             Elms.find((e) => e.Name == "NumNodes").Enabled = true;
             Elms.find((e) => e.Name == "ButtonNodes").Enabled = false;
