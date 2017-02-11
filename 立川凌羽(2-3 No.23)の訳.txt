@@ -1,0 +1,95 @@
+﻿1
+preamble 
+
+you shoot many many(degawa english)composite numbers.
+
+you hit the [⇦]and[⇨]to move, and [⇧]to use the launchin' machine that shoot 
+like north korea's ultimate weapons that is called 
+"一発までなら誤射かもしれない。"in Japanese. they are very strong.
+if you want to see some videos, you should hit the [h].
+it doesn't have reasons.don't you like chaffs, you will be fucked by Da Hui.
+
+
+if you want to close this help, you hit the [help].  you'll be started to
+recognize your mind and guessed ahead your hopes.
+
+
+
+
+2
+then, in city
+
+a programer shouted,"Numbers are culturally independent and established in all worlds!what is way to find number of excellent element!th way of not to be relied on cardinal numbers and to decompose uniquely...that is only factorization in prime numbers!"
+
+at that time, peaple had unprecedented experience.
+
+1.前文
+
+ 合成数を打つだけのかんたんなゲームです。
+you shoot many many(degawa english)composite numbers.
+
+ 使うキーは移動に使う[←|→]と玉の発射に使う[↑]、困ったときに助けてくれる[H]しかありません。
+you hit the [⇦]and[⇨]to move, and [⇧]to use the launchin' machine that shoot 
+like north korea's ultimate weapons that are called 
+"一発までなら誤射かもしれない。"in Japanese. they are very strong.
+
+ このヘルプを閉じたいのであれば、もう一度[Help]を撃ってみてください。あなたのPCが操作を行ったタイミングからあなたの願い・心情・考え方を認識・予測し、あなたの願いを叶えてくれることでしょう
+if you want to close this help, you hit the [help].  you'll be started to recognize your mind and guessed ahead your hopes.
+
+2.そのころ都では...
+
+ 「数は文化に非依存でありすべての世界において成立する！そのような素晴らしい数の要素を特定する方法は何か！基数にも依存せず一意的に分けることが出来る方法・・・素因数分解にほかならない」あるプログラマーは叫んだ。その時、今までにはないこと・・・物理法則の崩壊、魔法の無効化、神父の混乱など様々なことが都に起きた。
+a programer shouted,"Numbers are culturally independent and established in all worlds!what is way to find number of excellent element!th way of not to be relied on cardinal numbers and to decompose uniquely...that is only factorization in prime numbers!"
+at that time, peaple had unprecedented experience.such as 
+ この都では殆どの作業が「魔法」として信仰の対象となっているオートメーションシステムによって行われている。そして「神父」として社会的に優位な立場にいるもの・・・エンジニアも存在していた。 
+
+ その中のひとりがある日「教会」と言われていた3Dホログラムディスプレイを使いこう話しかけた 
+ 「この世界はいつ崩壊してもおかしくない。神は我々の生活に怒り魔法の仕様を変え始めている。かろうじて魔法の書き換えを行ってはいるが神父が不足するのも時間の問題だ。そこで私はこの世界のすべての人に神父としての力を得てほしいと思っている。」 
+ 大半の市民は、 
+ 「神父になるためには高い知能が要求される。そのために神父の地位が存在しているはずだ。一般市民が親父になれるはずがない」と考え、その他の市民は、ただただ混乱していた。 
+ それを予想しつつも、その神父は話を続けた。 
+ 「今回の変更にて、神はすべての自然数を元素・・・つまり素因数へ分解し表記する方法を考案なさった。これからの魔法の記述はこの記数方法を基本として行われる。しかし、この方法をマスターするには『慣れ』が必要だ。 
+ そこで私は一つの応用魔法を開発した。その名も、『ソシュー』だ！」 
+ その後、彼が実行した魔法により、一つのゲームが表示された。
+
+
+ このゲームは、そんな神父によって作られたトレーニングツールだ。まずは直感を鍛えることから始まる。素数を一瞬で見分けよ、あなたは「変人」として慕われ、周りからも距離を置かれた存在になれることであろう!
+
+3.都？いいから点数計算が正しいか調べさせろよ
+
+so what? no kidding, show me how to reckon the score, Jap!
+かしこまりました。点数計算については以下のとおりです。戦略を決める際にでもお使いください。
+ certainly. those are as follows:
+a prime number N is annihilated by "Filter": +1(lv) +7N(pt)
+
+a composite number N is shot: +1/7(Lv) +N(Pt)
+
+a prime number N is shot: -31/7(Lv) -31N(Pt) -3(Life)
+
+a prime number N has gone down and disappear: +11/7(Lv) +11N(Pt)
+
+a composite number N has gone down and disappear: -17/7(Lv) -17N(Pt) -1(Life)
+
+per rising 13 lv: +1(Help)
+
+per rising 97 lv: +1(Filter)
+
+do you understand? 7,11,13,17,31,97...yes, these are PRIME NUMBERS! PRIME NUMBERS ARE HORY!
+
+and "Level" means the falling biggest number.
+
+thinking about game is important, so we don't say anymore.menndokusai.
+
+
+
+
+Filterによって素数Nが消される: +1(lv) +7N(pt)
+合成数Nを打つ: +1/7(Lv) +N(Pt)
+素数Nを打つ: -31/7(Lv) -31N(Pt) -3(Life)
+素数Nが下まで落ちる: +11/7(Lv) +11N(Pt)
+合成数Nが下まで落ちる: -17/7(Lv) -17N(Pt) -1(Life)
+13lv上がるごとに: +1(Help)
+97Lv上がるごとに: +1(Filter)
+もうわかりましたか? 7,11,13,17,31,97・・・そうです！素数です！素数万歳！
+あと一つ言っておくと、Levelは落ちてくる数の最大値となっております。
+細かいことはゲームをしながら考えてみてください。説明がめんどくさいとかそんな理由ではありません。

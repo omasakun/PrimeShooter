@@ -1,0 +1,48 @@
+なんか時制とか適当 => 直さねば
+1. First
+  This is a simple game. Shot composite numbers. That is all. Press [←|→] to move and press [↑] to shot. Press [H] to help you when in trouble.
+  If you want to close this help, Shot [Help] again. Your PC will recognize and predict your wishes, motions, thinking method from the timing of shooting [Help] and make your hope realize!
+
+2. At that time in the city ...
+  A programmer shouted "Number is not dependent on culture and common in all the world! What is the way to find such a wonderful element of number? That is PRIME FACTORIZATION! "
+  At that time, such as the disabling of magic and Collapse of physical law, it happened that not happened in the city so far.
+  In the city, most jobs are done by the automation system subject to faith as "magic".
+  And something that is in socially superior position which is said to be "priest" ... Engineers also existed.
+  One of them used a 3D hologram display which is said to be "church" and spoke
+  "This world may collapse someday. God is beginning to change magic mechanism. We are rewriting barely magic, but priests will soon run short. Then, I want all people in this world to gain power as priests."
+  Most citizens think "High intelligence is required to become a priest, therefore there is the position of the priest. So, it is impossible for citizen to be a priest."
+  And the other citizens are just confused.
+  And then the priest said "With the current change, God devices a method to display all natural numbers as prime factors. Description of the future of the magic is done this numeration way as basic! But 'mastering' is necessary to master this method. So, I developed one application magic. That is 'Prime Shooter'"
+  After that, one game was displayed by the magic which he executed.
+
+  This game is made by the priest. Start by training intuition first. 
+  Distinguish prime numbers in a moment, you will be loved as a "weirdo"!
+
+3.都？そんなこといいから点数計算が正しいか調べさせろよ
+
+かしこまりました。点数計算については以下のとおりです。戦略を決める際にでもお使いください。
+
+Filterによって素数Nが消される: +1(lv) +7N(pt)
+合成数Nを打つ: +1/7(Lv) +N(Pt)
+素数Nを打つ: -31/7(Lv) -31N(Pt) -3(Life)
+素数Nが下まで落ちる: +11/7(Lv) +11N(Pt)
+合成数Nが下まで落ちる: -17/7(Lv) -17N(Pt) -1(Life)
+13lv上がるごとに: +1(Help)
+97Lv上がるごとに: +1(Filter)
+もうわかりましたか? 7,11,13,17,31,97・・・そうです！素数です！素数万歳！
+あと一つ言っておくと、Levelは落ちてくる数の最大値となっております。
+細かいことはゲームをしながら考えてみてください。このゲームは、どこまで仕様を知っているかという知識でのアドバンテージも重視されます。決して説明がめんどくさいとかそんな理由で説明を省いたのではありません。
+4.神は言った
+
+ 「さて、これからどうするべきか・・・とりあえず素因数分解でもさせるか」
+
+5.都とソシューと青年と
+
+ この都にはたくさんの仕事がある。警察・神父・消防・発明・・・。ここに挙げたものはこの都の仕事を支えている職業である。これらの基礎的職業の上に、企業や家庭、農家と言った応用的職業が存在している。基礎的職業は全ての応用的職業において必要とされているためほとんど失業することはない。そのためこれらの職業に憧れるものも多く、並大抵の思考力ではこれらの職に就くことはできなかった。それも有り、基礎的職業従事者たちは都のものから圧倒的な信頼と優遇を手にしていた。そんな都に、一人の青年がいた。
+ 「さて、これからどうするべきか・・・とりあえず暇だしGeneral algorithmとMarkov chainをベースとするAIでも作りながら考えるか」
+ そう言ってから、教会の机に向かってひたすら呪文を唱えていった。
+ そして、20分経った頃だろうか、青年は言った。
+ 「}return [c,i];}・・・あぁ、楽しい時間が終わってしまった。実行する気も出ないほど退屈だ。あれ、新しい通達が届いてる。」
+ その通達には、これから魔法の書き方が変わることが書かれていた。
+ 「つまり、今作ったAIは今のままでは動かない、ということか。でも、記数方法を書き換えるだけだし、書き換えるのもめんどくさいし・・・このままでいいや。魔法をうまく作れるようになることが目的だし。まあ、職についた後はこうも言ってられなくなるんだろうけど」
+ その後青年は、ソシューを使うまでもなく、新しい記数方法を覚えた。都の青年に、ソシューは関係なかった。

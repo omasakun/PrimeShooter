@@ -688,6 +688,7 @@ function onLoad(Elms) {
     let btns = Elms.find((e) => e.Name == "ButtonNodes");
     if (btns instanceof ButtonNodes) {
         btns.Add(1, 1, Settings.Game.Wcount - 2, 3, "Prime Shooter", 2, () => btns.texts[0].text = btns.texts[0].text == "Prime Shooter" ? "素数シューティング" : "Prime Shooter");
+        btns.Add(1, 5, Settings.Game.Wcount - 2, 1, "Press [←|↑|→] to shot [Help]", 1, () => btns.texts[0].text = btns.texts[0].text == "Prime Shooter" ? "素数シューティング" : "Prime Shooter");
         btns.Add(1, 11, 3, 2, "Start", 1.5, () => {
             Elms.find((e) => e.Name == "Dropper").Enabled = true;
             Elms.find((e) => e.Name == "NumNodes").Enabled = true;
@@ -732,7 +733,7 @@ function onTick(Elms, span) {
             if (btns instanceof ButtonNodes) {
                 btns.Enabled = true;
                 btns.Clear();
-                btns.Add(1, 1, Settings.Game.Wcount - 2, 3, "Gameover", 2, () => alert("そうかそうか、そんなに13が好きか。それはいいことだ。あそこまできれいな素数は他にはないと私は思うのだが・・・どう思うかね？ワトソンくん"));
+                btns.Add(1, 1, Settings.Game.Wcount - 2, 3, "Gameover", 2, () => alert("13! 13! 13! "));
                 btns.Add(2, 5, Settings.Game.Wcount - 4, 1, `Score: ${Game.score}pt`, 1, () => 0);
                 btns.Add(2, 6.5, Settings.Game.Wcount - 4, 1, `Rank: ...`, 1, () => 0);
                 btns.Add(1.5, 11, Settings.Game.Wcount - 3, 2, "Add to Ranking", 1.5, () => {
@@ -789,7 +790,7 @@ function AddFilter(Elms) {
     if (btns instanceof ButtonNodes) {
         btns.Enabled = true;
         btns.Clear();
-        btns.Add(1, 1, Settings.Game.Wcount - 2, 3, "Add Filter", 2, () => btns.texts[0].text = btns.texts[0].text == "Add Filter" ? "13っていいよね！" : "Add Filter");
+        btns.Add(1, 1, Settings.Game.Wcount - 2, 3, "Add Filter", 2, () => btns.texts[0].text = btns.texts[0].text == "Add Filter" ? "13！" : "Add Filter");
         btns.Add(1, Settings.Game.Hcount - 9, 1, 2, "↑", 1.5, () => {
             let tmp = Elms.find((e) => e.Name == "Filters");
             if (tmp instanceof Filters) {
