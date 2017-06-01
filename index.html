@@ -4,7 +4,7 @@
 <head>
 	<title>Prime Shooter</title>
 	<meta charset="UTF-8">
-	<meta name="description" content="Prime Shooter.素数シューティングという名の、素数以外を打つゲームです">
+	<meta name="description" content="Prime Shooter.Shot composite number.Do NOT shot prime number.素数シューティングという、素数以外を撃つゲームです">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta content="IE=edge" http-equiv="X-UA-Compatible">
 	<script src="index.js" async></script>
@@ -18,181 +18,153 @@
 			color: #CCC;
 			/*overflow: hidden;*/
 		}
-		
+
 		body {
+			font-family: "Kokoro", "Rounded Mplus 1c", "Open Sans", 'Noto Sans Japanese', "Yu Gothic", "Meiryo UI", sans-serif;
+			font-weight: 300;
 			-webkit-user-select: none;
 			-moz-user-select: none;
 			-ms-user-select: none;
 			user-select: none;
 			background-color: #111;
+			overflow: hidden;
+		}
+
+		canvas {
+			box-shadow: 0 0 10px #555;
+		}
+
+		#container {
+			width: 100%;
 			text-align: center;
 			display: flex;
 			justify-content: center;
 			flex-wrap: wrap;
 		}
-		
-		canvas {
-			box-shadow: 0 0 10px #555;
-		}
-		
+
 		#help {
-			text-shadow: 0 0 3px #AAA, 0 0 10px #555;
-			max-width: 30em;
+			text-shadow: 0 0 3px #000, 0 0 10px #000;
+			max-width: 60vw;
+			max-height: 100%;
 			text-align: start;
-			line-height: 2em;
+			line-height: 2;
 			margin: 0.5em;
 			max-height: calc(100vh - 1em);
 			overflow: auto;
 		}
-		
+
+		#help h2 {
+			text-shadow: none;
+		}
+
 		#rankingList {
 			text-align: start;
 		}
-		
+
 		#rankingList>* {
 			display: block;
 		}
-		
+
 		#rankingList>*>* {
 			display: inline;
 			min-width: 3em;
 		}
-		
+
 		#rankingList>*>*:not(:first-child) {
 			margin-left: 1em;
 		}
-		
+
 		.hide {
 			display: none;
+		}
+
+		.stack>* {
+			position: absolute;
+		}
+
+		.stack>*>* {
+			position: relative;
 		}
 	</style>
 </head>
 
-<body>
-	<div id="message">Loading...</div>
-	<div id="help" class="hide">
-		<h1>Japanese Version</h1>
-		<h2>1.前文</h2>
-		<p>
-			&emsp;合成数を打つだけのかんたんなゲームです。
-		</p>
-		<p>
-			&emsp;使うキーは移動に使う[←|→]と玉の発射に使う[↑]、困ったときに助けてくれる[H]しかありません。
-		</p>
-		<p>
-			&emsp;ゲームを始めたいのであれば、[Start]を撃ってみてください。[Add Filter]が表示されますので、[↑|↓]を押し、Filterの位置を決めた上で、[Start]を撃ってください
-		</p>
-		<p>
-			&emsp;このヘルプを閉じたいのであれば、もう一度[Help]を撃ってみてください。あなたのPCが操作を行ったタイミングからあなたの願い・心情・考え方を認識・予測し、あなたの願いを叶えてくれることでしょう
-		</p>
-		<h2>2.そのころ都では...</h2>
-		<p>
-			&emsp;「数は文化に非依存でありすべての世界において成立する！そのような素晴らしい数の要素を特定する方法は何か！基数にも依存せず一意的に分けることが出来る方法・・・素因数分解にほかならない」あるプログラマーは叫んだ。その時、今まで起きたことがなかったこと・・・物理法則の崩壊、魔法の無効化、神父の混乱など様々なことが都に起きた。
-		</p>
-		<p>
-			&emsp;この都では殆どの作業が「魔法」として信仰の対象となっているオートメーションシステムによって行われている。そして「神父」として社会的に優位な立場にいるもの・・・エンジニアも存在していた。
-			<br>&emsp;その中のひとりがある日「教会」と言われていた3Dホログラムディスプレイを使いこう話しかけた
-			<br>&emsp;「この世界はいつ崩壊してもおかしくない。神は我々の生活に怒り魔法の仕様を変え始めている。かろうじて魔法の書き換えを行ってはいるが神父が不足するのも時間の問題だ。そこで私はこの世界のすべての人に神父としての力を得てほしいと思っている。」
-			<br>&emsp;大半の市民は、
-			<br>&emsp;「神父になるためには高い知能が要求される。そのために神父の地位が存在しているはずだ。一般市民が神父になれるはずがない」と考え、その他の市民は、そんなことを考える余裕もなくただただ混乱していた。
-			<br>&emsp;それを予想しつつも、その神父は話を続けた。
-			<br>&emsp;「今回の変更にて、神はすべての自然数を元素・・・つまり素因数へ分解し表記する方法を考案なさった。これからの魔法の記述はこの記数方法を基本として行われる。しかし、この方法をマスターするには『慣れ』が必要だ。
-			<br>&emsp;そこで私は一つの応用魔法を開発した。その名も、『ソシュー』だ！」
-			<br>&emsp;その後、彼が実行した魔法により、一つのゲームが表示された。
-		</p>
-		<p>
-			<br>&emsp;このゲームは、そんな神父によって作られたトレーニングツールだ。まずは直感を鍛えることから始まる。素数を一瞬で見分けよ、あなたは「変人」として慕われ、周りからも距離を置かれた存在になれることであろう!
-		</p>
-		<h2>3.都？そんなこといいから点数計算が正しいか調べさせろよ</h2>
-		<p>
-			かしこまりました。点数計算については以下のとおりです。戦略を決める際にでもお使いください。
+<body class="stack">
+	<canvas id="bg"></canvas>
+	<div id="container">
+		<div id="help">
+			<p>
+				&emsp;全ての合成数のみを撃つ。
+			</p>
+			<p>
+				[←|→]で移動し、[↑]で玉を撃ち、[H]で素数に印をつける。
+			</p>
+			<p>
+				&emsp;[Start]を撃ち、Filterの追加に進む</p>
+			<p>&emsp; [↑|↓]を撃ち、Filterの位置を決めた上で、[Add&amp;Start]を撃つ </p>
+			<p>Filterに当たった素数は得点に変換される</p>
+			<p>ゲーム終了後、[Add to Ranking]を押すことで、ランキングに追加できる</p>
+		</div>
+		<!--
+		<div id="help" class="hide-TODO">
+			<h2>基本操作等</h2>
+			<p>
+				&emsp;全ての合成数のみを撃つゲームです。
+			</p>
+			<p>
+				[←|→]で移動し、[↑]で玉を撃ち、[H]で素数に印をつけます。
+			</p>
+			<p>
+				&emsp;[Start]を撃ち、フィルターの追加に進んでください。[Add Filter]が表示されますので、[↑|↓]を撃ち、Filterの位置を決めた上で、[Start]を撃ってください
+			</p>
+			<p>
+				&emsp;もう一度[Help]を撃ってこのヘルプを閉じてください。
+			</p>
+			<p>
+				&emsp;Filterに当たった素数は得点に変換されます。一番下まで合成数が落ちた場合にも減点されます。
+			</p>
+			<h2>点数計算</h2>
 			<ul>
 				<li>Filterによって素数Nが消される: +1(lv) +7N(pt)</li>
-				<li>合成数Nを打つ: +1/7(Lv) +N(Pt)</li>
-				<li>素数Nを打つ: -31/7(Lv) -31N(Pt) -3(Life)</li>
+				<li>合成数Nを撃つ: +1/7(Lv) +N(Pt)</li>
+				<li>素数Nを撃つ: -31/7(Lv) -31N(Pt) -3(Life)</li>
 				<li>素数Nが下まで落ちる: +11/7(Lv) +11N(Pt)</li>
 				<li>合成数Nが下まで落ちる: -17/7(Lv) -17N(Pt) -1(Life)</li>
 				<li>13lv上がるごとに: +1(Help)</li>
 				<li>97Lv上がるごとに: +1(Filter)</li>
 			</ul>
-			もうわかりましたか? 7,11,13,17,31,97・・・そうです！素数です！素数万歳！<br> あと一つ言っておくと、Levelは落ちてくる数の最大値となっております。
-			<br> 細かいことはゲームをしながら考えてみてください。このゲームは、どこまで仕様を知っているかという知識でのアドバンテージも重視されます。決して説明がめんどくさいとかそんな理由で説明を省いたのではありません。
-		</p>
-		<h2>4.神は言った</h2>
-		<p>
-			&emsp;「さて、これからどうするべきか・・・とりあえず素因数分解でもさせるか」
-		</p>
-		<h2>5.都とソシューと青年と</h2>
-		<p>
-			&emsp;この都にはたくさんの仕事がある。警察・神父・消防・発明・・・。ここに挙げたものはこの都の仕事を支えている職業である。これらの基礎的職業の上に、企業や家庭、農家と言った応用的職業が存在している。基礎的職業は全ての応用的職業において必要とされているためほとんど失業することはない。そのためこれらの職業に憧れるものも多く、並大抵の思考力ではこれらの職に就くことはできなかった。それも有り、基礎的職業従事者たちは都のものから圧倒的な信頼と優遇を手にしていた。そんな都に、一人の青年がいた。<br>			&emsp;「さて、これからどうするべきか・・・とりあえず暇だしGeneral algorithmとMarkov chainをベースとするAIでも作りながら考えるか」<br> &emsp;そう言ってから、教会の机に向かってひたすら呪文を唱えていった。
-			<br> &emsp;そして、20分経った頃だろうか、青年は言った。
-			<br> &emsp;「}return [c,i];}・・・あぁ、楽しい時間が終わってしまった。実行する気も出ないほど退屈だ。あれ、新しい通達が届いてる。」<br> &emsp;その通達には、これから魔法の書き方が変わることが書かれていた。
-			<br> &emsp;「つまり、今作ったAIは今のままでは動かない、ということか。でも、記数方法を書き換えるだけだし、書き換えるのもめんどくさいし・・・このままでいいや。魔法をうまく作れるようになることが目的だし。まあ、職についた後はこうも言ってられなくなるんだろうけど」
-			<br> &emsp;その後青年は、ソシューを使うまでもなく、新しい記数方法を覚えた。
-			<br><br> &emsp;都の青年に、ソシューは関係なかった。
-		</p>
-		<h1>English Version</h1>
-		<h2>1. First</h2>
-		<p>
-			&emsp;This is a simple game. Shoot ALL composite numbers. That is all. Press [←|→] to move and press [↑] to shoot. Press
-			[H] to help you when in trouble.<br>
-		</p>
-		<p>
-			&emsp;If you want to close this help, Shoot [Help] again. Your PC will recognize and predict your wishes, motions, thinking
-			method from the timing when [Help] is shot and make your hope realize!
-		</p>
-		<h2>2. At that time in a city ...</h2>
-		<p>
-			&emsp;A programmer shouted, "Numbers are not dependent on culture and common in all the world! What is the way to find such
-			a wonderful element of number? The way of not dependent on cardinal numbers and to decompose uniquely... That is PRIME
-			FACTORIZATION! "<br> &emsp;At that time, people had unprecedented experience such as Disabled of magic and Collapse
-			of physical law.
-		</p>
-		<p>
-			&emsp;In the city, most jobs are done by the automation system subject to faith as "magic".<br> &emsp;And something that
-			is in socially superior position which is said to be "priest" ... Engineers also exist.<br> &emsp;One of them used a 3D
-			hologram display which is said to be "church" and spoke<br> &emsp;"This world may collapse someday. God is beginning to
-			change magic mechanism. We are rewriting magic, but priests will run short soon. Then, I want all people in this world
-			to gain power as priests."<br> &emsp;Most citizens thought "High intelligence is required to become a priest, therefore
-			there is the position of the priest. So, it is impossible for citizen to be a priest."<br> &emsp;And the other citizens
-			were just confused.<br> &emsp;And then the priest said "With the currently change, God devises a method to display all
-			natural numbers as prime factors. Description of the future of the magic is done this numeration way as basic! But 'mastering'
-			is necessary to master this method. So, I developed one application magic. That is 'Prime Shooter'"<br> &emsp;After that,
-			the game was displayed by the magic which he executed.
-		</p>
-		<p>
-			&emsp;This game was created by the priest.... Sorry, the game was really created by programmer. Start by training intuition
-			first. <br> &emsp;Distinguish prime numbers in a moment.<br> &emsp;When you become be able to distinguish prime numbers
-			in a moment, you will be loved as a "weirdo"!
-		</p>
-		<h2>3.So what? Show me how to count the score</h2>
-		<p>
-			Certainly, I will tell you. They are as follows:
-			<ul>
-				<li>A prime number N is removed by green horizon line "Filter": +1 Level +7N Points</li>
-				<li>A composite number N is shot: +1/7 Levels +N Points</li>
-				<li>A prime number N is shot: -31/7 Levels) -31N Points -3 Lives</li>
-				<li>A prime number N has fell and disappear: +11/7 Levels +11N Points</li>
-				<li>A composite number N has fell and disappear: -17/7 Levels -17N Points -1 Life</li>
-				<li>Every 13 Levels increase: +1 Help</li>
-				<li>Every 97 Levels increase: +1 Filter</li>
-			</ul>
-			Do you understand already? 7,11,13,17,31,97... Yes, they are prime numbers!<br> "Level" is the biggest of falling numbers.<br>			Thinking about the game is important!<br> how far you know the specification of the game, is also important.
-		</p>
-		<h2>4. God said,</h2>
-		<p>
-			&emsp;"Well, what should I do now... Oh, yes! I should make people prime factorization!"
-		</p>
-		<h2>5.The city and the boy and the "Prime Shooter"</h2>
-		<p>
-			&emsp;Unfortunately, this paragraph has not been translated.
-		</p>
-	</div>
+			<h2>1. First</h2>
+			<p>
+				&emsp;This is a simple game. Shoot ALL composite numbers. Press [←|→] to move and press [↑] to shoot. Press [H] to help you
+				to mark prime number.<br>
+			</p>
+			<p>
+				&emsp;If you want to close this help, Shoot [Help] again.
+			</p>
+			<h2>Scoring</h2>
+				<ul>
+					<li>A prime number N is removed by green horizon line "Filter": +1 Level +7N Points</li>
+					<li>A composite number N is shot: +1/7 Levels +N Points</li>
+					<li>A prime number N is shot: -31/7 Levels) -31N Points -3 Lives</li>
+					<li>A prime number N has fell and disappear: +11/7 Levels +11N Points</li>
+					<li>A composite number N has fell and disappear: -17/7 Levels -17N Points -1 Life</li>
+					<li>Every 13 Levels increase: +1 Help</li>
+					<li>Every 97 Levels increase: +1 Filter</li>
+				</ul>
+					</div>-->
+
 	<canvas id="c1"></canvas>
 	<div id="ranking" class="hide">
 		<ul id="rankingList">
 		</ul>
 	</div>
+	</div>
+	<div id="message">Loading...</div>
+	<style>
+		@import url('https://fonts.googleapis.com/earlyaccess/notosansjapanese.css');
+		@import url('https://fonts.googleapis.com/css?family=Open+Sans:300,700');
+		@import url('https://fonts.googleapis.com/earlyaccess/kokoro.css');
+		@import url('https://fonts.googleapis.com/earlyaccess/roundedmplus1c.css');
+	</style>
 </body>
 
 </html>

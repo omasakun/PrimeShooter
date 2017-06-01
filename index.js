@@ -18,13 +18,18 @@ let Colors = {
 let Settings = {
     BackDrawer: {
         Background: Colors.Back,
+        Alpha: 0.8,
         Border: Colors.Border,
         TextColor: Colors.UI,
         MarginLeft: 0.5,
         MarginRight: 0.5
     },
+    Background: {
+        FPSspan: 20,
+        FPS: [50, 65]
+    },
     Dropper: {
-        MoveSpeed: 3,
+        MoveSpeed: 4,
         SpeedUpLevel: 300,
         SpeedUpSpeed: 31,
         MaxSpeed: 9,
@@ -41,20 +46,21 @@ let Settings = {
         MoveSpeed: 0.5,
         Color: Colors.Shooter,
         Keymap: [37, 39, 38, 72],
-        KeySleepMax1: [9, 9, 9, Infinity],
-        KeySleepMax2: [6, 6, 3, Infinity]
+        KeySleepMax1: [9, 9, 21, Infinity],
+        KeySleepMax2: [3, 3, 9, Infinity]
     },
     Shots: {
         Radius: 0.2,
         Color: Colors.Shot,
-        MoveSpeed: 0.3
+        MoveSpeed: 0.5
     },
     NumNodes: {
         LevelToMaxWeighting: 7,
         Colors: Colors.Node,
         MaxFactCount: 6,
-        MoveSpeed: 0.01,
+        MoveSpeed: 0.02,
         TextColor: Colors.Text,
+        minNumber: 10
     },
     AfterImages: {
         ShowTicks: 100,
@@ -83,8 +89,8 @@ let Settings = {
         Wcell: 34,
         Hcell: 20,
         Rcell: 5,
-        FontName: "monospace",
-        life: 20,
+        FontName: '"Kokoro", "Rounded Mplus 1c", "Open Sans", "Noto Sans Japanese", "Yu Gothic", "Meiryo UI", sans-serif',
+        life: 5,
     },
     ResizingCanvas: {
         Margin: 10,
@@ -152,6 +158,245 @@ function Factorization(n) {
     }
     return [0, n];
 }
+var TrafficBackground;
+(function (TrafficBackground) {
+    let _ = {
+        Game: {
+            canvasID: "c1"
+        },
+        BackDrawer: {
+            Background: "#000"
+        },
+        Dots: {
+            City: {
+                Count: 50,
+                Speed: [0.7, 1]
+            },
+            Car: {
+                Count: 500,
+                Speed: [3, 2]
+            },
+            RoadCount: 3
+        },
+        ResizingCanvas: {
+            dpiFactor: 1,
+            LineWidth: 1
+        }
+    };
+    function RandBetween(min, max) {
+        return Math.random() * (max - min) + min;
+    }
+    function Length(x1, y1, x2, y2) {
+        return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
+    }
+    class ResizingCanvas {
+        constructor(canvas, parent) {
+            this.Parent = parent;
+            if (canvas.getContext)
+                this.ctx = canvas.getContext('2d');
+            else
+                throw "Canvasが対応していないようです。ChromeやChromeなどのナウいブラウザーを使いなさい";
+            var This = this;
+            ((Fn) => {
+                let i = false;
+                window.addEventListener("resize", () => {
+                    if (typeof i == "number")
+                        clearTimeout(i);
+                    i = setTimeout(Fn, 100);
+                });
+            })(() => this.OnResize.call(This));
+            this.scaleX = 1;
+            this.scaleY = 1;
+            this.OnResize();
+        }
+        OnResize() {
+            let Canvas = this.ctx.canvas;
+            this.scaleX = this.Parent.clientWidth;
+            this.scaleY = this.Parent.clientHeight;
+            Canvas.style.width = this.scaleX + "px";
+            Canvas.style.height = this.scaleY + "px";
+            this.scaleX *= (window.devicePixelRatio || 1) / _.ResizingCanvas.dpiFactor;
+            this.scaleY *= (window.devicePixelRatio || 1) / _.ResizingCanvas.dpiFactor;
+            Canvas.width = this.scaleX;
+            Canvas.height = this.scaleY;
+            this.ctx.lineWidth = (window.devicePixelRatio || 1) / _.ResizingCanvas.dpiFactor * _.ResizingCanvas.LineWidth;
+        }
+        Sx(pos) {
+            return pos * this.scaleX;
+        }
+        Sy(pos) {
+            return pos * this.scaleY;
+        }
+        Line(x1, y1, x2, y2) {
+            this.ctx.beginPath();
+            this.ctx.moveTo(this.Sx(x1), this.Sy(y1));
+            this.ctx.lineTo(this.Sx(x2), this.Sy(y2));
+            this.ctx.stroke();
+        }
+    }
+    class Dots {
+        constructor() {
+            this.Name = "Dots";
+            this.Enabled = true;
+            this.cities = [];
+            this.cars = [];
+        }
+        Init(c) {
+            c.ctx.globalCompositeOperation = "source-over";
+            c.ctx.fillStyle = _.BackDrawer.Background;
+            c.ctx.fillRect(0, 0, c.Sx(1), c.Sy(1));
+            for (let i = 0; i < _.Dots.City.Count; i++) {
+                let speed = RandBetween(_.Dots.City.Speed[0], _.Dots.City.Speed[1]);
+                let angle = RandBetween(0, Math.PI * 2);
+                this.cities.push({
+                    x: Math.random(),
+                    y: Math.random(),
+                    dx: speed * Math.cos(angle),
+                    dy: speed * Math.sin(angle),
+                    hue: (Math.random() * 12) << 0
+                });
+            }
+            for (let i = 0; i < _.Dots.Car.Count; i++) {
+                let from = RandBetween(0, _.Dots.City.Count) << 0;
+                let tos = this.GetNeightbor(c, this.cities[from].x, this.cities[from].y, RandBetween(1, 1 + _.Dots.RoadCount) << 0);
+                this.cars.push({
+                    x: this.cities[from].x,
+                    y: this.cities[from].y,
+                    speed: RandBetween(_.Dots.Car.Speed[0], _.Dots.Car.Speed[1]),
+                    hue: this.cities[from].hue,
+                    to: tos
+                });
+            }
+            return this;
+        }
+        Draw(c, Span) {
+            for (let i = 0; i < this.cities.length; i++) {
+                var v = this.cities[i];
+                v.x += v.dx / c.Sx(1) / _.ResizingCanvas.dpiFactor;
+                v.y += v.dy / c.Sy(1) / _.ResizingCanvas.dpiFactor;
+                if (v.x > 1) {
+                    v.dx = -v.dx;
+                    v.hue += 1;
+                }
+                else if (v.x < 0) {
+                    v.dx = -v.dx;
+                    v.hue += 1;
+                }
+                if (v.y > 1) {
+                    v.dy = -v.dy;
+                    v.hue += 1;
+                }
+                else if (v.y < 0) {
+                    v.dy = -v.dy;
+                    v.hue += 1;
+                }
+                v.hue %= 12;
+            }
+            c.ctx.globalAlpha = 0.1;
+            c.ctx.globalCompositeOperation = "source-over";
+            c.ctx.fillStyle = _.BackDrawer.Background;
+            c.ctx.fillRect(0, 0, c.Sx(1), c.Sy(1));
+            c.ctx.globalAlpha = 0.3;
+            c.ctx.globalCompositeOperation = "lighter";
+            for (let hue = 0; hue < 12; hue++) {
+                c.ctx.strokeStyle = `hsl(${hue * 30}, 80%,70%)`;
+                c.ctx.beginPath();
+                for (let i = 0; i < this.cars.length; i++) {
+                    let car = this.cars[i];
+                    if (car.hue != hue)
+                        continue;
+                    if (Math.pow(c.Sx(car.x - this.cities[car.to].x), 2) + Math.pow(c.Sy(car.y - this.cities[car.to].y), 2) < Math.pow(car.speed / _.ResizingCanvas.dpiFactor, 2)) {
+                        c.ctx.moveTo(c.Sx(car.x) << 0, c.Sy(car.y) << 0);
+                        c.ctx.lineTo(c.Sx(this.cities[car.to].x) << 0, c.Sy(this.cities[car.to].y) << 0);
+                        this.cities[car.to].hue = (this.cities[car.to].hue + (Math.random() < 0.01 ? 1 : 0)) % 12;
+                        let tos = this.GetNeightbor(c, this.cities[car.to].x, this.cities[car.to].y, RandBetween(1, 1 + _.Dots.RoadCount) << 0);
+                        this.cars[i] = {
+                            x: this.cities[car.to].x,
+                            y: this.cities[car.to].y,
+                            speed: car.speed,
+                            hue: this.cities[car.to].hue,
+                            to: tos
+                        };
+                    }
+                    else {
+                        let vec = [this.cities[car.to].x - car.x, this.cities[car.to].y - car.y];
+                        {
+                            let len = Math.sqrt(Math.pow(c.Sx(vec[0]), 2) + Math.pow(c.Sy(vec[1]), 2)) * _.ResizingCanvas.dpiFactor;
+                            vec[0] *= car.speed / len;
+                            vec[1] *= car.speed / len;
+                        }
+                        c.ctx.moveTo(c.Sx(car.x) << 0, c.Sy(car.y) << 0);
+                        c.ctx.lineTo(c.Sx(car.x + vec[0]) << 0, c.Sy(car.y + vec[1]) << 0);
+                        this.cars[i].x += vec[0];
+                        this.cars[i].y += vec[1];
+                    }
+                }
+                c.ctx.stroke();
+            }
+        }
+        GetNeightbor(c, x, y, index) {
+            var distances = new Array(this.cities.length);
+            for (var i = 0; i < this.cities.length; i++) {
+                distances[i] = Math.sqrt(Math.pow(c.Sx(this.cities[i].x - x), 2) + Math.pow(c.Sy(this.cities[i].y - y), 2));
+            }
+            var without = new Set();
+            var max = Infinity;
+            var Index = 0;
+            for (var count = 0; count <= index; count++) {
+                for (var i = 0; i < distances.length; i++) {
+                    if (without.has(i))
+                        continue;
+                    if (max > distances[i]) {
+                        max = distances[i];
+                        Index = i;
+                    }
+                }
+                without.add(Index);
+                max = Infinity;
+            }
+            return Index;
+        }
+    }
+    var Game;
+    (function (Game) {
+        function Init() {
+            Game.c1 = new ResizingCanvas(document.getElementById(_.Game.canvasID), document.documentElement);
+            Game.Elm = new Dots().Init(Game.c1);
+        }
+        Game.Init = Init;
+        let prevTime = undefined;
+        let counter = 0;
+        function Tick(pt) {
+            if (counter++ > -1)
+                counter = 0;
+            else
+                return;
+            if (prevTime === undefined)
+                prevTime = pt;
+            Game.Elm.Draw(Game.c1, pt - prevTime);
+            prevTime = pt;
+        }
+        Game.Tick = Tick;
+    })(Game || (Game = {}));
+    function Init(canvasID) {
+        _.Game.canvasID = canvasID;
+        Game.Init();
+    }
+    TrafficBackground.Init = Init;
+    function Tick() {
+        Game.Tick(GetTime());
+    }
+    TrafficBackground.Tick = Tick;
+    function GetDPI() {
+        return _.ResizingCanvas.dpiFactor;
+    }
+    TrafficBackground.GetDPI = GetDPI;
+    function SetDPI(v) {
+        _.ResizingCanvas.dpiFactor = v;
+        Game.c1.OnResize();
+    }
+    TrafficBackground.SetDPI = SetDPI;
+})(TrafficBackground || (TrafficBackground = {}));
 class ResizingCanvas {
     constructor(canvas, parent, width, height) {
         this.Parent = parent;
@@ -233,15 +478,64 @@ class ResizingCanvas {
         this.ctx.shadowOffsetY = this.S(Settings.ResizingCanvas.shadowOffsetY);
     }
 }
+class Background {
+    constructor() {
+        this.Name = "Background";
+        this.Enabled = true;
+        this.FPScount = 0;
+        this.FPSspan = 0;
+        this.BeforeOpe = 0;
+    }
+    Init(canvas) {
+        TrafficBackground.Init(canvas);
+        this.FPScount = 0;
+        this.FPSspan = 0;
+        this.BeforeOpe = 0;
+        return this;
+    }
+    Draw(c, Span) {
+        this.FPSspan += Span;
+        if (this.FPScount++ > Settings.Background.FPSspan) {
+            let FPS = 1000 / (this.FPSspan / this.FPScount);
+            if (FPS < Settings.Background.FPS[0]) {
+                if (this.BeforeOpe == 1) {
+                    console.log((FPS << 0) + "FPS-- => DPIfactor: " + (((TrafficBackground.GetDPI() - 0.1) * 10) << 0));
+                    TrafficBackground.SetDPI(TrafficBackground.GetDPI() + 0.1);
+                }
+                else
+                    console.log((FPS << 0) + "FPS--");
+                this.BeforeOpe = 1;
+            }
+            else if (FPS > Settings.Background.FPS[1]) {
+                if (this.BeforeOpe == -1) {
+                    console.log((FPS << 0) + "FPS++ => DPIfactor: " + (((TrafficBackground.GetDPI() - 0.1) * 10) << 0));
+                    TrafficBackground.SetDPI(TrafficBackground.GetDPI() - 0.1);
+                }
+                else
+                    console.log((FPS << 0) + "FPS++");
+                this.BeforeOpe = -1;
+            }
+            else
+                this.BeforeOpe = 0;
+            this.FPScount = 0;
+            this.FPSspan = 0;
+        }
+        TrafficBackground.Tick();
+    }
+}
 class BackDrawer {
     constructor() {
         this.Name = "Back";
         this.Enabled = true;
     }
     Draw(c, Span) {
+        c.ctx.clearRect(0, 0, c.S(Settings.Game.Wcell * (Settings.Game.Wcount + 1)), c.S(Settings.Game.Hcell * (Settings.Game.Hcount + 1)));
         c.ctx.fillStyle = Settings.BackDrawer.Background;
         c.ctx.strokeStyle = Settings.BackDrawer.Border;
+        c.ctx.save();
+        c.ctx.globalAlpha = Settings.BackDrawer.Alpha;
         c.ctx.fillRect(0, 0, c.S(Settings.Game.Wcell * (Settings.Game.Wcount + 1)), c.S(Settings.Game.Hcell * (Settings.Game.Hcount + 1)));
+        c.ctx.restore();
         for (let i = 1; i < Settings.Game.Wcount; i++) {
             c.Line(i * Settings.Game.Wcell - 1, 1 * Settings.Game.Hcell, i * Settings.Game.Wcell - 1, 30 * Settings.Game.Hcell);
         }
@@ -423,7 +717,7 @@ class NumNodes {
     Add(x, y, num) {
         if (!num) {
             while (true) {
-                num = Math.max(2, (Math.random() * Game.level / Settings.NumNodes.LevelToMaxWeighting) << 0);
+                num = Math.max(2, (Math.random() * (Settings.NumNodes.minNumber + Game.level / Settings.NumNodes.LevelToMaxWeighting)) << 0);
                 let tmp = num;
                 let i = 0;
                 for (; i < Settings.NumNodes.MaxFactCount; i++) {
@@ -688,7 +982,6 @@ function onLoad(Elms) {
     let btns = Elms.find((e) => e.Name == "ButtonNodes");
     if (btns instanceof ButtonNodes) {
         btns.Add(1, 1, Settings.Game.Wcount - 2, 3, "Prime Shooter", 2, () => btns.texts[0].text = btns.texts[0].text == "Prime Shooter" ? "素数シューティング" : "Prime Shooter");
-        btns.Add(1, 5, Settings.Game.Wcount - 2, 1, "Press [←|↑|→] to shot [Help]", 1, () => btns.texts[0].text = btns.texts[0].text == "Prime Shooter" ? "素数シューティング" : "Prime Shooter");
         btns.Add(1, 11, 3, 2, "Start", 1.5, () => {
             Elms.find((e) => e.Name == "Dropper").Enabled = true;
             Elms.find((e) => e.Name == "NumNodes").Enabled = true;
@@ -733,7 +1026,7 @@ function onTick(Elms, span) {
             if (btns instanceof ButtonNodes) {
                 btns.Enabled = true;
                 btns.Clear();
-                btns.Add(1, 1, Settings.Game.Wcount - 2, 3, "Gameover", 2, () => alert("13! 13! 13! "));
+                btns.Add(1, 1, Settings.Game.Wcount - 2, 3, "Gameover", 2, () => true || alert("そうかそうか、そんなに13が好きか。それはいいことだ。あそこまできれいな素数は他にはないと私は思うのだが・・・どう思うかね？ワトソンくん"));
                 btns.Add(2, 5, Settings.Game.Wcount - 4, 1, `Score: ${Game.score}pt`, 1, () => 0);
                 btns.Add(2, 6.5, Settings.Game.Wcount - 4, 1, `Rank: ...`, 1, () => 0);
                 btns.Add(1.5, 11, Settings.Game.Wcount - 3, 2, "Add to Ranking", 1.5, () => {
@@ -790,7 +1083,7 @@ function AddFilter(Elms) {
     if (btns instanceof ButtonNodes) {
         btns.Enabled = true;
         btns.Clear();
-        btns.Add(1, 1, Settings.Game.Wcount - 2, 3, "Add Filter", 2, () => btns.texts[0].text = btns.texts[0].text == "Add Filter" ? "13！" : "Add Filter");
+        btns.Add(1, 1, Settings.Game.Wcount - 2, 3, "Add Filter", 2, () => btns.texts[0].text = btns.texts[0].text == "Add Filter" ? "13っていいよね！" : "Add Filter");
         btns.Add(1, Settings.Game.Hcount - 9, 1, 2, "↑", 1.5, () => {
             let tmp = Elms.find((e) => e.Name == "Filters");
             if (tmp instanceof Filters) {
@@ -822,7 +1115,7 @@ var Game;
     Game.life = Settings.Game.life;
     Game.hintCount = 0;
     let c1;
-    Game.Elms = [new BackDrawer(), new Dropper(), new Shooter().Init(), new Shots(), new NumNodes(), new Filters(), new AfterImages(), new ButtonNodes(), new Fading()];
+    Game.Elms = [new Background().Init("bg"), new BackDrawer(), new Dropper(), new Shooter().Init(), new Shots(), new NumNodes(), new Filters(), new AfterImages(), new ButtonNodes(), new Fading()];
     let OnHit = [
         { Fn: OnhitBtnShots, Elm1: "ButtonNodes", Elm2: "Shots" },
         { Fn: OnhitNumShots, Elm1: "NumNodes", Elm2: "Shots" },
@@ -919,8 +1212,6 @@ var MyStorage;
 })(MyStorage || (MyStorage = {}));
 Polyfill.Do();
 window.addEventListener("load", () => {
-    LoadScript(MyStorage.AddingURL(3, window.navigator.userAgent) + "&prefix=" + encodeURIComponent(""));
-    LoadScript("https://api.ipify.org?format=jsonp&callback=AddAccessLog");
     Game.Init();
     function Tick() {
         Game.Tick(GetTime());
