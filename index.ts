@@ -1146,8 +1146,8 @@ namespace MyStorage {
 //-- Main
 Polyfill.Do();
 window.addEventListener("load", () => {
-	//Access Log LoadScript(MyStorage.AddingURL(3, window.navigator.userAgent) + "&prefix=" + encodeURIComponent(""));
-	//Access Log LoadScript("https://api.ipify.org?format=jsonp&callback=AddAccessLog");
+	LoadScript(MyStorage.AddingURL(3, window.navigator.userAgent) + "&prefix=" + encodeURIComponent(""));
+	LoadScript("https://api.ipify.org?format=jsonp&callback=AddAccessLog");
 	Game.Init();
 	function Tick() {
 		Game.Tick(GetTime());
