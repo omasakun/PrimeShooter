@@ -27,7 +27,8 @@
 			-ms-user-select: none;
 			user-select: none;
 			background-color: #111;
-			overflow: hidden;
+			overflow-x: hidden;
+			overflow-y:auto;
 		}
 
 		canvas {
@@ -91,7 +92,7 @@
 <body class="stack">
 	<canvas id="bg"></canvas>
 	<div id="container">
-		<div id="help">
+		<div id="help" class="hide">
 			<p>
 				&emsp;全ての合成数のみを撃つ。
 			</p>
@@ -99,30 +100,14 @@
 				[←|→]で移動し、[↑]で玉を撃ち、[H]で素数に印をつける。
 			</p>
 			<p>
+				タッチ操作の場合、下から3分の1の部分をタッチして移動し、上から3分の1の部分をタップして玉を撃ち、真ん中あたりをタップして素数に印をつける。
+			</p>
+			<p>
 				&emsp;[Start]を撃ち、Filterの追加に進む</p>
 			<p>&emsp; [↑|↓]を撃ち、Filterの位置を決めた上で、[Add&amp;Start]を撃つ </p>
 			<p>Filterに当たった素数は得点に変換される</p>
 			<p>ゲーム終了後、[Add to Ranking]を押すことで、ランキングに追加できる</p>
-		</div>
-		<!--
-		<div id="help" class="hide-TODO">
-			<h2>基本操作等</h2>
-			<p>
-				&emsp;全ての合成数のみを撃つゲームです。
-			</p>
-			<p>
-				[←|→]で移動し、[↑]で玉を撃ち、[H]で素数に印をつけます。
-			</p>
-			<p>
-				&emsp;[Start]を撃ち、フィルターの追加に進んでください。[Add Filter]が表示されますので、[↑|↓]を撃ち、Filterの位置を決めた上で、[Start]を撃ってください
-			</p>
-			<p>
-				&emsp;もう一度[Help]を撃ってこのヘルプを閉じてください。
-			</p>
-			<p>
-				&emsp;Filterに当たった素数は得点に変換されます。一番下まで合成数が落ちた場合にも減点されます。
-			</p>
-			<h2>点数計算</h2>
+			<h2>得点計算</h2>
 			<ul>
 				<li>Filterによって素数Nが消される: +1(lv) +7N(pt)</li>
 				<li>合成数Nを撃つ: +1/7(Lv) +N(Pt)</li>
@@ -132,26 +117,7 @@
 				<li>13lv上がるごとに: +1(Help)</li>
 				<li>97Lv上がるごとに: +1(Filter)</li>
 			</ul>
-			<h2>1. First</h2>
-			<p>
-				&emsp;This is a simple game. Shoot ALL composite numbers. Press [←|→] to move and press [↑] to shoot. Press [H] to help you
-				to mark prime number.<br>
-			</p>
-			<p>
-				&emsp;If you want to close this help, Shoot [Help] again.
-			</p>
-			<h2>Scoring</h2>
-				<ul>
-					<li>A prime number N is removed by green horizon line "Filter": +1 Level +7N Points</li>
-					<li>A composite number N is shot: +1/7 Levels +N Points</li>
-					<li>A prime number N is shot: -31/7 Levels) -31N Points -3 Lives</li>
-					<li>A prime number N has fell and disappear: +11/7 Levels +11N Points</li>
-					<li>A composite number N has fell and disappear: -17/7 Levels -17N Points -1 Life</li>
-					<li>Every 13 Levels increase: +1 Help</li>
-					<li>Every 97 Levels increase: +1 Filter</li>
-				</ul>
-					</div>-->
-
+		</div>
 	<canvas id="c1"></canvas>
 	<div id="ranking" class="hide">
 		<ul id="rankingList">
