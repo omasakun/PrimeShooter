@@ -28,11 +28,17 @@
 			user-select: none;
 			background-color: #111;
 			overflow-x: hidden;
-			overflow-y:auto;
+			overflow-y: auto;
 		}
 
-		canvas {
+		canvas#c1 {
 			box-shadow: 0 0 10px #555;
+		}
+
+		canvas#bg {
+			position: absolute;
+			top: 0;
+			left: 0;
 		}
 
 		#container {
@@ -51,7 +57,8 @@
 			line-height: 2;
 			margin: 0.5em;
 			max-height: calc(100vh - 1em);
-			overflow: auto;
+			overflow-x: hidden;
+			overflow-y: auto;
 		}
 
 		#help h2 {
@@ -66,9 +73,18 @@
 			display: block;
 		}
 
-		#rankingList>*>* {
-			display: inline;
+		#rankingList>*>*{
+			display: inline-block;
+		}
+		#rankingList>*>*:first-child {
 			min-width: 3em;
+		}
+		#rankingList>*>*:nth-child(2) {
+			min-width: 5em;
+		}
+
+		#rankingList>*>*:nth-child(3) {
+			min-width: 6em;
 		}
 
 		#rankingList>*>*:not(:first-child) {
@@ -91,8 +107,8 @@
 
 <body class="stack">
 	<canvas id="bg"></canvas>
-	<div id="container">
-		<div id="help" class="hide">
+	<div id="container" style="max-height:100%;overflow-y:auto;overflow-x:hidden">
+		<div id="help">
 			<p>
 				&emsp;全ての合成数のみを撃つ。
 			</p>
@@ -101,6 +117,9 @@
 			</p>
 			<p>
 				タッチ操作の場合、下から3分の1の部分をタッチして移動し、上から3分の1の部分をタップして玉を撃ち、真ん中あたりをタップして素数に印をつける。
+			</p>
+			<p>
+				マウス操作の場合、[右・左クリック]で移動し、[中央クリック]で球を打ち、[H]で素数に印をつける。
 			</p>
 			<p>
 				&emsp;[Start]を撃ち、Filterの追加に進む</p>
@@ -118,19 +137,13 @@
 				<li>97Lv上がるごとに: +1(Filter)</li>
 			</ul>
 		</div>
-	<canvas id="c1"></canvas>
-	<div id="ranking" class="hide">
-		<ul id="rankingList">
-		</ul>
-	</div>
+		<canvas id="c1"></canvas>
+		<div id="ranking" class="hide">
+			<ul id="rankingList">
+			</ul>
+		</div>
 	</div>
 	<div id="message">Loading...</div>
-	<style>
-		@import url('https://fonts.googleapis.com/earlyaccess/notosansjapanese.css');
-		@import url('https://fonts.googleapis.com/css?family=Open+Sans:300,700');
-		@import url('https://fonts.googleapis.com/earlyaccess/kokoro.css');
-		@import url('https://fonts.googleapis.com/earlyaccess/roundedmplus1c.css');
-	</style>
 </body>
 
 </html>

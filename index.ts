@@ -1,5 +1,3 @@
-//TODO: 間違えたときにそれが残って表示される
-//TODO: Acccess log, HTMLの、hide-TODOを削除
 let Colors = {
 	Back: "#000",//#FFF
 	Border: "#222",//#757575
@@ -140,6 +138,65 @@ namespace Polyfill {
 			timer = setTimeout(callback, 1000 / 60);
 		};
 		window.requestAnimationFrame = window.requestAnimationFrame || window.webkitRequestAnimationFrame || polyfill;
+		if (!Array.prototype.find) {
+			Object.defineProperty(Array.prototype, 'find', {
+				value: function (predicate) {
+					var o = Object(this);
+					var len = o.length >>> 0;
+					var thisArg = arguments[1];
+					var k = 0;
+					while (k < len) {
+						var kValue = o[k];
+						if (predicate.call(thisArg, kValue, k, o))
+							return kValue;
+						k++;
+					}
+					return undefined;
+				}
+			});
+		}
+		if (!Array.prototype.findIndex) {
+			Object.defineProperty(Array.prototype, 'findIndex', {
+				value: function (predicate) {
+					var o = Object(this);
+					var len = o.length >>> 0;
+					var thisArg = arguments[1];
+					var k = 0;
+					while (k < len) {
+						var kValue = o[k];
+						if (predicate.call(thisArg, kValue, k, o))
+							return k;
+						k++;
+					}
+					return -1;
+				}
+			});
+		}
+		if (!Array.prototype.fill) {
+			Object.defineProperty(Array.prototype, 'fill', {
+				value: function (value) {
+					var O = Object(this);
+					var len = O.length >>> 0;
+					var start = arguments[1];
+					var relativeStart = start >> 0;
+					var k = relativeStart < 0 ?
+						Math.max(len + relativeStart, 0) :
+						Math.min(relativeStart, len);
+					var end = arguments[2];
+					var relativeEnd = end === undefined ?
+						len : end >> 0;
+					var final = relativeEnd < 0 ?
+						Math.max(len + relativeEnd, 0) :
+						Math.min(relativeEnd, len);
+					while (k < final) {
+						O[k] = value;
+						k++;
+					}
+					return O;
+				}
+			});
+		}
+		Math.sign = Math.sign || ((x) => x === 0 ? 0 : x > 0 ? 1 : -1);
 	}
 }
 function GetTime(): number {
@@ -597,11 +654,13 @@ class Shooter implements Elm {
 	Init(c: HTMLCanvasElement) {
 		let it = this;
 		document.addEventListener("keydown", (e) => {
-			if (e.repeat) return;
 			let tmp = it.Keymap.findIndex((v) => v == e.keyCode);
 			if (tmp < 0) return;
 			e.preventDefault();
-			it.KeyMode[tmp] = 1;
+			if (e.repeat) return;
+			if (it.KeyMode[tmp] == 0) {
+				it.KeyMode[tmp] = 1;
+			}
 		});
 		document.addEventListener("keyup", (e) => {
 			let tmp = it.Keymap.findIndex((v) => v == e.keyCode);
@@ -612,19 +671,58 @@ class Shooter implements Elm {
 		c.addEventListener("touchstart", (e) => onTappedChanged(e.touches));
 		c.addEventListener("touchmove", (e) => onTappedChanged(e.touches));
 		c.addEventListener("touchend", (e) => onTappedChanged(e.touches));
+		c.addEventListener("mousedown", (e) => {
+			let i = ([0, 2, 1])[e.button];
+			if (it.KeyMode[i] == 0) {
+				it.KeyMode[i] = 1;
+			}
+		});
+		c.addEventListener("mouseup", (e) => {
+			let i = ([0, 2, 1])[e.button];
+			it.KeyMode[i] = 0;
+		});
 		c.addEventListener("touchcancel", ResetKeys);
+		c.addEventListener("contextmenu", (e) => e.preventDefault());
 		window.addEventListener("blur", ResetKeys);
-		function onTappedChanged(touches: TouchList) {
+		function onClickedChanged(mouse: MouseEvent) {
 			var tmp = it.KeyMode.map(() => 0);
+			if (mouse.type)
+				var rect = c.getBoundingClientRect();
 			for (let i = 0; i < touches.length; i++) {
-				let y = touches[i].pageY - c.offsetTop;
+				let y = touches[i].clientY - rect.top;
 				let h = c.clientHeight;
 				if (y < h / 3) {
 					tmp[2] = 1;
 				} else if (y < h / 3 * 2) {
 					tmp[3] = 1;
 				} else {
-					let x = touches[i].pageX - c.offsetLeft;
+					let x = touches[i].clientX - rect.left;
+					let w = c.clientWidth;
+					if (x < w / 2) {
+						tmp[0] = 1;
+					} else {
+						tmp[1] = 1;
+					}
+				}
+			}
+			for (let i = 0; i < tmp.length; i++) {
+				if ((it.KeyMode[i] == 0) != (tmp[i] == 0)) {
+					it.KeyMode[i] = tmp[i];
+				}
+			}
+		}
+		function onTappedChanged(touches: TouchList) {
+			var tmp = it.KeyMode.map(() => 0);
+			var rect = c.getBoundingClientRect();
+			for (let i = 0; i < touches.length; i++) {
+				let y = touches[i].clientY - rect.top;
+				let h = c.clientHeight;
+				if (y < h / 3) {
+					tmp[2] = 1;
+				} else if (y < h / 3 * 2) {
+					tmp[3] = 1;
+				} else {
+					let x = touches[i].clientX - rect.left;
 					let w = c.clientWidth;
 					if (x < w / 2) {
 						tmp[0] = 1;
@@ -1017,6 +1115,10 @@ function onTick(Elms: Elm[], span: number) {
 				btns.Add(1, 1, Settings.Game.Wcount - 2, 3, "Gameover", 2, () => true || /*TODO*/alert("そうかそうか、そんなに13が好きか。それはいいことだ。あそこまできれいな素数は他にはないと私は思うのだが・・・どう思うかね？ワトソンくん"));
 				btns.Add(2, 5, Settings.Game.Wcount - 4, 1, `Score: ${Game.score}pt`, 1, () => 0);
 				btns.Add(2, 6.5, Settings.Game.Wcount - 4, 1, `Rank: ...`, 1, () => 0);
+				btns.Add(1.5, 15, 3, 2, "Restart", 1.5, () => {
+					if (confirm("本当に?"))
+						location.reload(true);
+				});
 				btns.Add(1.5, 11, Settings.Game.Wcount - 3, 2, "Add to Ranking", 1.5, () => {
 					if (btns instanceof ButtonNodes) {
 						if (btns.texts[btns.texts.length - 1].text == "Add to Ranking") {
@@ -1135,7 +1237,7 @@ namespace Game {
 	}
 	export function GetLevelText(Level = level): string {
 		if (Level % Settings.NumNodes.LevelToMaxWeighting == 0)
-			return Level.toString();
+			return (Level / Settings.NumNodes.LevelToMaxWeighting).toString();
 		else if (Level < Settings.NumNodes.LevelToMaxWeighting)
 			return Level + "/" + Settings.NumNodes.LevelToMaxWeighting;
 		else
@@ -1182,13 +1284,29 @@ namespace MyStorage {
 		LoadScript(AddingURL(id, text) + `&prefix=${encodeURIComponent("MyStorage._AddCB")}`);
 	}
 }
-
+namespace CSSloader {
+	export function Load(URLs: string[]) {
+		URLs.forEach((url) => {
+			var link = document.createElement('link');
+			link.type = 'text/css';
+			link.rel = 'stylesheet';
+			link.href = url;
+			document.head.appendChild(link);
+		});
+	}
+}
 //-- Main
 Polyfill.Do();
 window.addEventListener("load", () => {
 	AccessTime = DateFormat(new Date());
 	LoadScript(MyStorage.AddingURL(3, AccessTime + " " + window.navigator.userAgent) + "&prefix=" + encodeURIComponent(""));
 	LoadScript("https://api.ipify.org?format=jsonp&callback=AddAccessLog");
+	CSSloader.Load([
+		"https://fonts.googleapis.com/earlyaccess/notosansjapanese.css",
+		"https://fonts.googleapis.com/css?family=Open+Sans:300,700",
+		"https://fonts.googleapis.com/earlyaccess/kokoro.css",
+		"https://fonts.googleapis.com/earlyaccess/roundedmplus1c.css"
+	]);
 	Game.Init();
 	function Tick() {
 		Game.Tick(GetTime());
