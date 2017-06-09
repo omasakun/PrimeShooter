@@ -251,7 +251,7 @@ namespace TrafficBackground {
 		constructor(canvas: any, parent: Element) {
 			this.Parent = parent;
 			if (canvas.getContext) this.ctx = canvas.getContext('2d');
-			else throw "Canvasが対応していないようです。ChromeやChromeなどのナウいブラウザーを使いなさい"
+			else throw "ERROR: canvas.getContext"
 			var This = this;
 			((Fn) => {
 				let i: boolean | number = false;
@@ -456,7 +456,7 @@ class ResizingCanvas {
 	constructor(canvas: any, parent: Element, width: number, height: number) {
 		this.Parent = parent;
 		if (canvas.getContext) this.ctx = canvas.getContext('2d');
-		else throw "Canvasが対応していないようです。ChromeやChromeなどのナウいブラウザーを使いなさい"
+		else throw "ERROR: canvas.getContext"
 		var This = this;
 		((Fn) => {
 			let i: boolean | number = false;
@@ -684,33 +684,6 @@ class Shooter implements Elm {
 		c.addEventListener("touchcancel", ResetKeys);
 		c.addEventListener("contextmenu", (e) => e.preventDefault());
 		window.addEventListener("blur", ResetKeys);
-		function onClickedChanged(mouse: MouseEvent) {
-			var tmp = it.KeyMode.map(() => 0);
-			if (mouse.type)
-				var rect = c.getBoundingClientRect();
-			for (let i = 0; i < touches.length; i++) {
-				let y = touches[i].clientY - rect.top;
-				let h = c.clientHeight;
-				if (y < h / 3) {
-					tmp[2] = 1;
-				} else if (y < h / 3 * 2) {
-					tmp[3] = 1;
-				} else {
-					let x = touches[i].clientX - rect.left;
-					let w = c.clientWidth;
-					if (x < w / 2) {
-						tmp[0] = 1;
-					} else {
-						tmp[1] = 1;
-					}
-				}
-			}
-			for (let i = 0; i < tmp.length; i++) {
-				if ((it.KeyMode[i] == 0) != (tmp[i] == 0)) {
-					it.KeyMode[i] = tmp[i];
-				}
-			}
-		}
 		function onTappedChanged(touches: TouchList) {
 			var tmp = it.KeyMode.map(() => 0);
 			var rect = c.getBoundingClientRect();
@@ -1112,11 +1085,11 @@ function onTick(Elms: Elm[], span: number) {
 			if (btns instanceof ButtonNodes) {
 				btns.Enabled = true;
 				btns.Clear();
-				btns.Add(1, 1, Settings.Game.Wcount - 2, 3, "Gameover", 2, () => true || /*TODO*/alert("そうかそうか、そんなに13が好きか。それはいいことだ。あそこまできれいな素数は他にはないと私は思うのだが・・・どう思うかね？ワトソンくん"));
+				btns.Add(1, 1, Settings.Game.Wcount - 2, 3, "Gameover", 2, () => 0);
 				btns.Add(2, 5, Settings.Game.Wcount - 4, 1, `Score: ${Game.score}pt`, 1, () => 0);
 				btns.Add(2, 6.5, Settings.Game.Wcount - 4, 1, `Rank: ...`, 1, () => 0);
 				btns.Add(1.5, 15, 3, 2, "Restart", 1.5, () => {
-					if (confirm("本当に?"))
+					if (confirm("Reload this game?"))
 						location.reload(true);
 				});
 				btns.Add(1.5, 11, Settings.Game.Wcount - 3, 2, "Add to Ranking", 1.5, () => {
@@ -1169,7 +1142,7 @@ function AddFilter(Elms: Elm[]) {
 	if (btns instanceof ButtonNodes) {
 		btns.Enabled = true;
 		btns.Clear();
-		btns.Add(1, 1, Settings.Game.Wcount - 2, 3, "Add Filter", 2, () => btns.texts[0].text = btns.texts[0].text == "Add Filter" ? "13っていいよね！" : "Add Filter");
+		btns.Add(1, 1, Settings.Game.Wcount - 2, 3, "Add Filter", 2, () => btns.texts[0].text = btns.texts[0].text == "Add Filter" ? "13 = Great" : "Add Filter");
 		btns.Add(1, Settings.Game.Hcount - 9, 1, 2, "↑", 1.5, () => {
 			let tmp = Elms.find((e) => e.Name == "Filters");
 			if (tmp instanceof Filters) {

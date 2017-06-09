@@ -27,8 +27,7 @@
 			-ms-user-select: none;
 			user-select: none;
 			background-color: #111;
-			overflow-x: hidden;
-			overflow-y: auto;
+			overflow: hidden;
 		}
 
 		canvas#c1 {
@@ -73,12 +72,14 @@
 			display: block;
 		}
 
-		#rankingList>*>*{
+		#rankingList>*>* {
 			display: inline-block;
 		}
+
 		#rankingList>*>*:first-child {
 			min-width: 3em;
 		}
+
 		#rankingList>*>*:nth-child(2) {
 			min-width: 5em;
 		}
@@ -110,22 +111,26 @@
 	<div id="container" style="max-height:100%;overflow-y:auto;overflow-x:hidden">
 		<div id="help">
 			<p>
+				[Help]を撃つことで、このヘルプを閉じることが出来る。By shooting [Help], this help can be closed.
+			</p>
+			<hr>
+			<p>
 				&emsp;全ての合成数のみを撃つ。
 			</p>
 			<p>
-				[←|→]で移動し、[↑]で玉を撃ち、[H]で素数に印をつける。
+				&emsp;[←|→]で移動し、[↑]で玉を撃ち、[H]で素数に印をつける。
 			</p>
 			<p>
-				タッチ操作の場合、下から3分の1の部分をタッチして移動し、上から3分の1の部分をタップして玉を撃ち、真ん中あたりをタップして素数に印をつける。
+				&emsp;タッチ操作の場合、下から3分の1の部分をタッチして移動し、上から3分の1の部分をタップして玉を撃ち、真ん中あたりをタップして素数に印をつける。
 			</p>
 			<p>
-				マウス操作の場合、[右・左クリック]で移動し、[中央クリック]で球を打ち、[H]で素数に印をつける。
+				&emsp;マウス操作の場合、[右・左クリック]で移動し、[中央クリック]で球を打ち、[H]で素数に印をつける。
 			</p>
 			<p>
 				&emsp;[Start]を撃ち、Filterの追加に進む</p>
 			<p>&emsp; [↑|↓]を撃ち、Filterの位置を決めた上で、[Add&amp;Start]を撃つ </p>
-			<p>Filterに当たった素数は得点に変換される</p>
-			<p>ゲーム終了後、[Add to Ranking]を押すことで、ランキングに追加できる</p>
+			<p>&emsp;Filterに当たった素数は得点に変換される</p>
+			<p>&emsp;ゲーム終了後、[Add to Ranking]を押すことで、ランキングに追加できる</p>
 			<h2>得点計算</h2>
 			<ul>
 				<li>Filterによって素数Nが消される: +1(lv) +7N(pt)</li>
@@ -135,6 +140,31 @@
 				<li>合成数Nが下まで落ちる: -17/7(Lv) -17N(Pt) -1(Life)</li>
 				<li>13lv上がるごとに: +1(Help)</li>
 				<li>97Lv上がるごとに: +1(Filter)</li>
+			</ul>
+			<hr>
+			<p>
+				&emsp;Shoot ALL composite numbers.
+			</p>
+			<p>
+				&emsp;Press [←|→] to move and press [↑] to shoot. Press [H] to mark prime numbers.
+			</p>
+			<p>
+				&emsp;Mouse Operation: move with [Left/Right click] and hit a ball with [Middle click].
+			</p>
+			<p>
+				&emsp;Touch Operation: Touch the part of 1/3 from the bottom to move, tap the 1/3 part from the top to shoot the ball, tap
+				the middle and mark the prime numbers.
+			</p>
+			<p>&emsp;Shot [Start] and proceed to add Filter. Shoot [↑ | ↓], decide the position of Filter, then shoot [Add &amp; Start]. After the game is over, you can add your score to the ranking by shooting [Add to Ranking]</p>
+			<h2>Scoreing Rules</h2>
+			<ul>
+				<li>A prime number N is removed by green horizon line "Filter": +1 Level +7N Points</li>
+				<li>A composite number N is shot: +1/7 Levels +N Points</li>
+				<li>A prime number N is shot: -31/7 Levels) -31N Points -3 Lives</li>
+				<li>A prime number N has fell and disappear: +11/7 Levels +11N Points</li>
+				<li>A composite number N has fell and disappear: -17/7 Levels -17N Points -1 Life</li>
+				<li>Every 13 Levels increase: +1 Help</li>
+				<li>Every 97 Levels increase: +1 Filter</li>
 			</ul>
 		</div>
 		<canvas id="c1"></canvas>
