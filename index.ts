@@ -1,19 +1,19 @@
 let Colors = {
-	Back: "#000",//#FFF
-	Border: "#222",//#757575
-	UI: "#777",
+	Back: "#a799ef",//#FFF
+	Border: "#b7aaf7",//#757575
+	UI: "#130f40",
 	Beam: "#F00",
-	Text: "#CCC",
-	Node: ["#333", "#242", "#422"],
+	Text: "#130f40",
+	Node: ["#a799ef", "#242", "#422"],
 	AfterImageFore: "#FF0",
 	AfterImageBack: "#800",
 	Filter: "#5F2",
-	Shooter: "#888",
-	Dropper: "#555",
-	Shot: "#CCC",
+	Shooter: "#7c72b3",
+	Dropper: "#8478be",
+	Shot: "#d9d1ff", // "#CCC",
 	ShadowX: 0,
-	ShadowY: 3,
-	ShadowR: 5
+	ShadowY: 2,
+	ShadowR: 10
 }
 let Settings = {
 	BackDrawer: {
@@ -26,7 +26,7 @@ let Settings = {
 	},
 	Background: {
 		FPSspan: 10,
-		FPS: [50, 65],
+		FPS: [10, 65],
 		DisableCount: 10 // 表示しなくなるまでには、何回FPSが落とされる必要がある化
 	},
 	Dropper: {
@@ -89,14 +89,14 @@ let Settings = {
 		Hcount: 32,//Dropper:1 Nodes:27 Shooter:1 Margin:1 UI:2 => sum:32
 		Wcell: 34,
 		Hcell: 20,
-		Rcell: 5,
-		FontName: '"Kokoro", "Rounded Mplus 1c", "Open Sans", "Noto Sans Japanese", "Yu Gothic", "Meiryo UI", sans-serif',
+		Rcell: 0, //5,
+		FontName: "'Lato', 'kokoro', 'Noto Sans JP', sans-serif",
 		life: 5,//TODO:20,
 	},
 	ResizingCanvas: {
 		Margin: 10,
 		shadowBlur: Colors.ShadowR,
-		shadowColor: "#000",
+		shadowColor: "rgba(10, 10, 10, 0.3)",
 		shadowOffsetX: Colors.ShadowX,
 		shadowOffsetY: Colors.ShadowY
 	},
@@ -219,7 +219,7 @@ namespace TrafficBackground {
 			canvasID: "c1"
 		},
 		BackDrawer: {
-			Background: "#000"
+			Background: "#f8f8f8"
 		},
 		Dots: {
 			City: {
@@ -234,7 +234,7 @@ namespace TrafficBackground {
 		},
 		ResizingCanvas: {
 			dpiFactor: 1,//画面の1pxにCanvasの何pxが対応するか
-			LineWidth: 1
+			LineWidth: 3
 		}
 	}
 	function RandBetween(min, max) {
@@ -351,7 +351,7 @@ namespace TrafficBackground {
 			c.ctx.fillStyle = _.BackDrawer.Background;
 			c.ctx.fillRect(0, 0, c.Sx(1), c.Sy(1));
 			c.ctx.globalAlpha = 0.3;//0.3;//0.8
-			c.ctx.globalCompositeOperation = "lighter";
+			c.ctx.globalCompositeOperation = "darker";
 			for (let hue = 0; hue < 12; hue++) {
 				c.ctx.strokeStyle = `hsl(${hue * 30}, 80%,70%)`;
 				c.ctx.beginPath();
@@ -671,6 +671,7 @@ class Shooter implements Elm {
 		c.addEventListener("touchstart", (e) => onTappedChanged(e.touches));
 		c.addEventListener("touchmove", (e) => onTappedChanged(e.touches));
 		c.addEventListener("touchend", (e) => onTappedChanged(e.touches));
+		/*
 		c.addEventListener("mousedown", (e) => {
 			let i = ([0, 2, 1])[e.button];
 			if (it.KeyMode[i] == 0) {
@@ -681,6 +682,7 @@ class Shooter implements Elm {
 			let i = ([0, 2, 1])[e.button];
 			it.KeyMode[i] = 0;
 		});
+		*/
 		c.addEventListener("touchcancel", ResetKeys);
 		c.addEventListener("contextmenu", (e) => e.preventDefault());
 		window.addEventListener("blur", ResetKeys);
@@ -1171,7 +1173,7 @@ namespace Game {
 	export let life = Settings.Game.life;
 	export let hintCount = 0;
 	let c1: ResizingCanvas;
-	export let Elms: Elm[] = [new Background().Init("bg"), new BackDrawer(), new Dropper(), /*new Shooter() Set it @ Init*/, new Shots(), new NumNodes(), new Filters(), new AfterImages(), new ButtonNodes(), new Fading()];
+	export let Elms: Elm[] = [/*new Background().Init("bg"),*/ new BackDrawer(), new Dropper(), /*new Shooter() Set it @ Init*/, new Shots(), new NumNodes(), new Filters(), new AfterImages(), new ButtonNodes(), new Fading()];
 	let OnHit: { Fn: (Elm1: Elm, Elm2: Elm, Span: number) => void, Elm1: string, Elm2: string }[] = [
 		{ Fn: OnhitBtnShots, Elm1: "ButtonNodes", Elm2: "Shots" },
 		{ Fn: OnhitNumShots, Elm1: "NumNodes", Elm2: "Shots" },
@@ -1180,7 +1182,7 @@ namespace Game {
 	];
 	export function Init(): void {
 		c1 = new ResizingCanvas(document.getElementById("c1"), document.documentElement, Settings.Game.Wcell * Settings.Game.Wcount, Settings.Game.Hcell * Settings.Game.Hcount);
-		Elms[3] = new Shooter().Init(c1.ctx.canvas);
+		Elms[2] = new Shooter().Init(c1.ctx.canvas);
 		onLoad(Elms);
 	}
 	let prevTime: number = undefined;
@@ -1272,13 +1274,11 @@ namespace CSSloader {
 Polyfill.Do();
 window.addEventListener("load", () => {
 	AccessTime = DateFormat(new Date());
-	LoadScript(MyStorage.AddingURL(3, AccessTime + " " + window.navigator.userAgent) + "&prefix=" + encodeURIComponent(""));
-	LoadScript("https://api.ipify.org?format=jsonp&callback=AddAccessLog");
+	// LoadScript(MyStorage.AddingURL(3, AccessTime + " " + window.navigator.userAgent) + "&prefix=" + encodeURIComponent(""));
+	// LoadScript("https://api.ipify.org?format=jsonp&callback=AddAccessLog");
 	CSSloader.Load([
-		"https://fonts.googleapis.com/earlyaccess/notosansjapanese.css",
-		"https://fonts.googleapis.com/css?family=Open+Sans:300,700",
-		"https://fonts.googleapis.com/earlyaccess/kokoro.css",
-		"https://fonts.googleapis.com/earlyaccess/roundedmplus1c.css"
+		"https://fonts.googleapis.com/css?family=Lato:300,700|Noto+Sans+JP:300,700|Overpass+Mono:300|Inconsolata:400&display=swap&subset=japanese",
+		"https://fonts.googleapis.com/earlyaccess/kokoro.css"
 	]);
 	Game.Init();
 	function Tick() {

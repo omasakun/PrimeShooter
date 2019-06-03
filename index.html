@@ -15,23 +15,25 @@
 		div {
 			padding: 0;
 			margin: 0;
-			color: #CCC;
 			/*overflow: hidden;*/
 		}
 
 		body {
-			font-family: "Kokoro", "Rounded Mplus 1c", "Open Sans", 'Noto Sans Japanese', "Yu Gothic", "Meiryo UI", sans-serif;
+			font-family: 'Lato', 'kokoro', 'Noto Sans JP', sans-serif;
 			font-weight: 300;
+			/*
 			-webkit-user-select: none;
 			-moz-user-select: none;
 			-ms-user-select: none;
 			user-select: none;
-			background-color: #111;
+			*/
+			background-color: #a799ef;
+			color: #130f40;
 			overflow: hidden;
 		}
 
 		canvas#c1 {
-			box-shadow: 0 0 10px #555;
+			box-shadow: 0 12px 60px rgba(10, 10, 10, 0.3);
 		}
 
 		canvas#bg {
@@ -49,12 +51,12 @@
 		}
 
 		#help {
-			text-shadow: 0 0 3px #000, 0 0 10px #000;
-			max-width: 60vw;
+			max-width: 30em;
 			max-height: 100%;
 			text-align: start;
 			line-height: 2;
 			margin: 0.5em;
+			padding-right: 1em;
 			max-height: calc(100vh - 1em);
 			overflow-x: hidden;
 			overflow-y: auto;
@@ -62,6 +64,13 @@
 
 		#help h2 {
 			text-shadow: none;
+			font-weight: 300;
+			font-size: 1.8em;
+			margin: 1em 0 0.5em 0;
+		}
+
+		#help p{
+			margin: 0.25em 0;
 		}
 
 		#rankingList {
@@ -107,9 +116,34 @@
 </head>
 
 <body class="stack">
-	<canvas id="bg"></canvas>
+	<!-- <canvas id="bg"></canvas> -->
 	<div id="container" style="max-height:100%;overflow-y:auto;overflow-x:hidden">
 		<div id="help">
+			<p>
+				&emsp;合成数をすべて撃ってください。
+			</p>
+			<p>
+				&emsp;[←|→]で移動。[↑]で弾を打つ。[H]で素数を色分け。
+			</p>
+			<p>
+				&emsp;タッチ操作の場合、画面の下の方をタッチして移動し、上の方をタップして玉を撃ち、真ん中あたりをタップして素数に印をつける。
+			</p>
+			<p>
+				&emsp;[Start]を撃ち、Filterの追加に進む</p>
+			<p>&emsp; [↑|↓]を撃ち、Filterの位置を決めた上で、[Add&amp;Start]を撃つ </p>
+			<p>&emsp;Filterに当たった素数は得点に変換される</p>
+			<p>&emsp;ゲーム終了後、[Add to Ranking]を押すことで、ランキングに追加できる</p>
+			<h2>得点計算</h2>
+			<ul>
+				<li>Filterによって素数Nが消される: +1(lv) +7N(pt)</li>
+				<li>合成数Nを撃つ: +1/7(Lv) +N(Pt)</li>
+				<li>素数Nを撃つ: -31/7(Lv) -31N(Pt) -3(Life)</li>
+				<li>素数Nが下まで落ちる: +11/7(Lv) +11N(Pt)</li>
+				<li>合成数Nが下まで落ちる: -17/7(Lv) -17N(Pt) -1(Life)</li>
+				<li>13lv上がるごとに: +1(Help)</li>
+				<li>97Lv上がるごとに: +1(Filter)</li>
+			</ul>
+			<hr>
 			<p>
 				&emsp;Shoot ALL composite numbers.
 			</p>
@@ -133,38 +167,6 @@
 				<li>A composite number N has fell and disappear: -17/7 Levels -17N Points -1 Life</li>
 				<li>Every 13 Levels increase: +1 Help</li>
 				<li>Every 97 Levels increase: +1 Filter</li>
-			</ul>
-			<hr>
-			<p>
-				[Help]を撃つことで、このヘルプを閉じることが出来る。By shooting [Help], this help can be closed.
-			</p>
-			<hr>
-			<p>
-				&emsp;全ての合成数のみを撃つ。
-			</p>
-			<p>
-				&emsp;[←|→]で移動し、[↑]で玉を撃ち、[H]で素数に印をつける。
-			</p>
-			<p>
-				&emsp;タッチ操作の場合、下から3分の1の部分をタッチして移動し、上から3分の1の部分をタップして玉を撃ち、真ん中あたりをタップして素数に印をつける。
-			</p>
-			<p>
-				&emsp;マウス操作の場合、[右・左クリック]で移動し、[中央クリック]で球を打ち、[H]で素数に印をつける。
-			</p>
-			<p>
-				&emsp;[Start]を撃ち、Filterの追加に進む</p>
-			<p>&emsp; [↑|↓]を撃ち、Filterの位置を決めた上で、[Add&amp;Start]を撃つ </p>
-			<p>&emsp;Filterに当たった素数は得点に変換される</p>
-			<p>&emsp;ゲーム終了後、[Add to Ranking]を押すことで、ランキングに追加できる</p>
-			<h2>得点計算</h2>
-			<ul>
-				<li>Filterによって素数Nが消される: +1(lv) +7N(pt)</li>
-				<li>合成数Nを撃つ: +1/7(Lv) +N(Pt)</li>
-				<li>素数Nを撃つ: -31/7(Lv) -31N(Pt) -3(Life)</li>
-				<li>素数Nが下まで落ちる: +11/7(Lv) +11N(Pt)</li>
-				<li>合成数Nが下まで落ちる: -17/7(Lv) -17N(Pt) -1(Life)</li>
-				<li>13lv上がるごとに: +1(Help)</li>
-				<li>97Lv上がるごとに: +1(Filter)</li>
 			</ul>
 		</div>
 		<canvas id="c1"></canvas>
