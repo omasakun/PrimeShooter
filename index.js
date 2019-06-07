@@ -4,7 +4,7 @@ let Colors = {
     UI: "#130f40",
     Beam: "#F00",
     Text: "#130f40",
-    Node: ["#a799ef", "#242", "#422"],
+    Node: ["#a799ef", "#cee9b1", "#dd8585"],
     AfterImageFore: "#FF0",
     AfterImageBack: "#800",
     Filter: "#5F2",

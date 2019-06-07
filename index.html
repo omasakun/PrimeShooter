@@ -4,7 +4,8 @@
 <head>
 	<title>Prime Shooter</title>
 	<meta charset="UTF-8">
-	<meta name="description" content="Prime Shooter.Shot composite number.Do NOT shot prime number.素数シューティングという、素数以外を撃つゲームです">
+	<meta name="description"
+		content="Prime Shooter.Shot composite number.Do NOT shot prime number.素数シューティングという、素数以外を撃つゲームです">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta content="IE=edge" http-equiv="X-UA-Compatible">
 	<script src="index.js" async></script>
@@ -44,10 +45,12 @@
 
 		#container {
 			width: 100%;
-			text-align: center;
 			display: flex;
 			justify-content: center;
 			flex-wrap: wrap;
+			max-height: 100%;
+			overflow-y: auto;
+			overflow-x: hidden;
 		}
 
 		#help {
@@ -69,8 +72,13 @@
 			margin: 1em 0 0.5em 0;
 		}
 
-		#help p{
+		#help p {
 			margin: 0.25em 0;
+		}
+
+		#help pre {
+			white-space: pre-wrap;
+			font: inherit;
 		}
 
 		#rankingList {
@@ -117,7 +125,7 @@
 
 <body class="stack">
 	<!-- <canvas id="bg"></canvas> -->
-	<div id="container" style="max-height:100%;overflow-y:auto;overflow-x:hidden">
+	<div id="container">
 		<div id="help">
 			<p>
 				&emsp;合成数をすべて撃ってください。
@@ -144,6 +152,44 @@
 				<li>97Lv上がるごとに: +1(Filter)</li>
 			</ul>
 			<hr>
+			<pre>
+ここは、数が降り注ぐ世界。
+あなたは、拠点を守る存在。
+あなたは、数に干渉する存在。
+
+あなたの拠点は合成数に弱いので、一番下まで合成数が落ちてくるとライフを失ってしまいます。
+それでは、どうやって落ちてくる合成数から身を守るのか？
+自己防衛のために戦うのです。合成数を打ちましょう。
+合成数はしょせん素数を掛け合わせたものにすぎないので、弾を打ち込んであげればそれだけで素数に分解されてくれます。
+
+気を付けてください。12 に一回弾を打ち込んでも、 2 と 6 に分解されるだけです。新たに生じた6にも弾を打ち込んで2と3に分解しなければいけません。
+細かいことを言うならば、36は2と18、75は3と25、というようにその数に含まれるもっとも小さな素数が左へ、それ以外が右へと分解されます。
+
+ここまで聞いたあなたはきっと思うことでしょう。「とりあえず全部の数に弾打っとけば勝てるやん」と。
+しかしそうはいかないのです。あなたが打ち込む弾が素数に当たってしまうと、まるでウランの塊に中性子を打ち込んだ時のように激しい爆発が起きてしまいます。
+結果、合成数を下まで落とした時の3倍のダメージを受けることとなるのです。
+気を付けてください。２回素数を打つだけであなたのライフは０になります。素数と弾が反応することの危険性を理解してください。
+
+～数年後～
+
+おっと、拠点での開発が進み、新たな装置「Filter」が発明されたようです。
+このFilter、素数を虚無に還元する働きを持っています。
+素数がFilterにあたるとき、当たった素数は消えます。
+拠点はまだまだ小さいのでFilterは一つ一つ手作業で作られています。
+そのため、二つ目、三つめのFilterが来るまでにはしばらくの時間がかかります。
+
+活用してください。Filterは、上のほうにある素数を消す唯一の手段です。
+考えてください。どこにFilterを置くかは生死を分ける重要な問題です。
+間違えないでください。一度置いたFilterは、あなたが力尽きるまで置きなおすことはできません。
+
+さて、あなたはFilterとともに、弾とともに、数の降り注ぐ世界で生き延びなければいけません。
+幸い今はまだ小さい数しか振ってこないのですが、375や563などの大きな数が降り注いだ時期もあった、という伝承も残っています。
+
+集中してください。画面上の9レーンすべてから数が落ちてきます。木を見て森も見てください。
+安心してください。あなたにはこの世界で生き延びられるだけの素数力があるはずです。
+頑張ってください。あなたの健闘を祈っています。
+				</pre>
+			<hr>
 			<p>
 				&emsp;Shoot ALL composite numbers.
 			</p>
@@ -154,10 +200,12 @@
 				&emsp;Mouse Operation: move with [Left/Right click] and hit a ball with [Middle click].
 			</p>
 			<p>
-				&emsp;Touch Operation: Touch the part of 1/3 from the bottom to move, tap the 1/3 part from the top to shoot the ball, tap
+				&emsp;Touch Operation: Touch the part of 1/3 from the bottom to move, tap the 1/3 part from the top to shoot the
+				ball, tap
 				the middle and mark the prime numbers.
 			</p>
-			<p>&emsp;Shot [Start] and proceed to add Filter. Shoot [↑ | ↓], decide the position of Filter, then shoot [Add &amp; Start]. After the game is over, you can add your score to the ranking by shooting [Add to Ranking]</p>
+			<p>&emsp;Shot [Start] and proceed to add Filter. Shoot [↑ | ↓], decide the position of Filter, then shoot [Add
+				&amp; Start]. After the game is over, you can add your score to the ranking by shooting [Add to Ranking]</p>
 			<h2>Scoreing Rules</h2>
 			<ul>
 				<li>A prime number N is removed by green horizon line "Filter": +1 Level +7N Points</li>
