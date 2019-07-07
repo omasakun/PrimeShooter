@@ -1315,6 +1315,10 @@ window.addEventListener("load", () => {
 		"https://fonts.googleapis.com/earlyaccess/kokoro.css"
 	]);
 	*/
+	setTimeout(() => {
+		document.body.removeChild(document.getElementById('message'));
+		document.getElementById('container').classList.remove("hide");
+	}, 500);
 	Game.Init();
 	function Tick() {
 		Game.Tick(GetTime());
@@ -1322,4 +1326,3 @@ window.addEventListener("load", () => {
 	}
 	Tick();
 });
-document.body.removeChild(document.getElementById('message'));

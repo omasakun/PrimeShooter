@@ -69,7 +69,7 @@ canvas#bg {
 }
 
 #canvas-parent {
-	margin: 2em 1em 0 1em;
+  margin: 2em 1em 0 1em;
 }
 
 #ranking {
@@ -125,4 +125,21 @@ canvas#bg {
   grid-template-columns: 1fr 48vh 1fr;
   height: 100%;
   width: 100%;
+}
+
+#message {
+  height: 100%;
+  width: 100%;
+  background-color: inherit;
+  display: flex;
+  flex-direction: column;
+  /* 子要素をflexboxにより縦方向に揃える */
+  justify-content: center;
+  /* 子要素をflexboxにより中央に配置する */
+  align-items: center;
+  /* 子要素をflexboxにより中央に配置する */
+}
+
+#message-text {
+  font-size: 2em;
 }

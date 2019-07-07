@@ -1362,6 +1362,10 @@ var CSSLoader;
 Polyfill.Do();
 window.addEventListener("load", () => {
     AccessTime = DateFormat(new Date());
+    setTimeout(() => {
+        document.body.removeChild(document.getElementById('message'));
+        document.getElementById('container').classList.remove("hide");
+    }, 500);
     Game.Init();
     function Tick() {
         Game.Tick(GetTime());
@@ -1369,4 +1373,3 @@ window.addEventListener("load", () => {
     }
     Tick();
 });
-document.body.removeChild(document.getElementById('message'));
