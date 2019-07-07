@@ -540,6 +540,7 @@ interface Elm {
 	BeforeDraw?(Elms: Elm[], Span: number): void
 	Draw?(c: ResizingCanvas, Span: number): void
 	AfterDraw?(Elms: Elm[], Span: number): void
+	Clear?(): void
 }
 class Background implements Elm {
 	Name = "Background";
@@ -583,7 +584,7 @@ class Background implements Elm {
 		}
 		TrafficBackground.Tick();
 	}
-}//Name:Background
+}//Name: Background
 class BackDrawer implements Elm {
 	Name = "Back";
 	Enabled = true;
@@ -603,9 +604,9 @@ class BackDrawer implements Elm {
 		c.TextLeft("Life:  " + Game.life.toString(), Settings.BackDrawer.MarginLeft * Settings.Game.Wcell, Settings.Game.Hcell * (Settings.Game.Hcount - 2 + 0.5), Settings.Game.Wcell * Settings.Game.Wcount / 2);
 		c.TextLeft("Score: " + Game.score.toString(), Settings.BackDrawer.MarginLeft * Settings.Game.Wcell, Settings.Game.Hcell * (Settings.Game.Hcount - 1 + 0.5), Settings.Game.Wcell * Settings.Game.Wcount / 2);
 		c.TextRight("Hint: " + Game.hintCount.toString(), (Settings.Game.Wcount - Settings.BackDrawer.MarginRight) * Settings.Game.Wcell, Settings.Game.Hcell * (Settings.Game.Hcount - 1 + 0.5), Settings.Game.Wcell * Settings.Game.Wcount / 2);
-		c.TextRight("Lv." + Game.GetLevelText(), (Settings.Game.Wcount - Settings.BackDrawer.MarginRight) * Settings.Game.Wcell, Settings.Game.Hcell * (Settings.Game.Hcount - 2 + 0.5), Settings.Game.Wcell * Settings.Game.Wcount / 2);
+		c.TextRight("Lv:" + Game.GetLevelText(), (Settings.Game.Wcount - Settings.BackDrawer.MarginRight) * Settings.Game.Wcell, Settings.Game.Hcell * (Settings.Game.Hcount - 2 + 0.5), Settings.Game.Wcell * Settings.Game.Wcount / 2);
 	}
-}//Name:Back
+}//Name: Back
 class Dropper implements Elm {
 	Name = "Dropper";
 	Enabled = true;
@@ -953,7 +954,7 @@ class Fading implements Elm {
 			this.Finished = true;
 		}
 	}
-}//Name:Fading
+}//Name: Fading
 function OnhitNumShots(num: NumNodes, shots: Shots, span: number) {
 	let delNumI: number[] = [];
 	let delShotI: number[] = [];
@@ -1046,17 +1047,23 @@ function onLoad(Elms: Elm[]) {
 
 	if (btns instanceof ButtonNodes) {
 		btns.Add(1, 1, Settings.Game.Wcount - 2, 3, "Prime Shooter", 2, () => btns.texts[0].text = btns.texts[0].text == "Prime Shooter" ? "素数シューティング" : "Prime Shooter");
-		btns.Add(1, 11, 3, 2, "Start", 1.5, () => {
+		const start = () => {
 			Elms.find((e) => e.Name == "Dropper").Enabled = true;
 			Elms.find((e) => e.Name == "NumNodes").Enabled = true;
 			Elms.find((e) => e.Name == "Filters").Enabled = true;
 			Elms.find((e) => e.Name == "ButtonNodes").Enabled = false;
 			Elms.find((e) => e.Name == "Shots").Clear();
 			AddFilter(Elms);
+		};
+		btns.Add(1, 16, 3, 2, "Start", 1.5, start);
+		btns.Add(Settings.Game.Wcount - 4, 16, 3, 2, "Ranking", 1.5, ()=>{
+			ShowRanking(() => { });
 		});
+		/*
 		btns.Add(Settings.Game.Wcount - 4, 11, 3, 2, "Help", 1.5, () => {
 			document.getElementById("help").classList.toggle("hide");
 		});
+		*/
 	} else throw "ERROR";
 }
 function onTick(Elms: Elm[], span: number) {
@@ -1112,22 +1119,29 @@ function onTick(Elms: Elm[], span: number) {
 						}
 					}
 				});
-				MyStorage.Get(1, (text) => {
-					let data: { Score: number, Level: number, Name: string, Date: string }[] = text.map((t) => JSON.parse(t));
-					data = data.sort((a, b) => b["Score"] - a["Score"]);
-					let list = document.getElementById("rankingList");
-					list.innerHTML = "";
-					data.forEach((v, i) => {
-						list.innerHTML += `<li><div>#${i + 1}</div><div>${v["Score"]}pt</div><div>Lv.${Game.GetLevelText(v["Level"])}</div><div>${v["Name"]}</div></li>`;
-					});
+				ShowRanking(data => {
 					let rank = data.findIndex((v) => v["Score"] <= Game.score) + 1;
 					if (rank == 0) rank = data.length + 1;
 					btns.texts[2].text = `Rank: ${rank}/${data.length + 1}`;
-					document.getElementById("ranking").classList.remove("hide");
 				});
+				showHelp("ranking");
 			} else throw "ERROR";
 		}
 	}
+}
+function ShowRanking(cb) {
+	let list = document.getElementById("rankingList");
+	document.getElementById("ranking").classList.remove("hide");
+	list.innerHTML = "<p>Loading...</p>";
+	MyStorage.Get(1, (text) => {
+		let data: { Score: number, Level: number, Name: string, Date: string }[] = text.map((t) => JSON.parse(t));
+		data = data.sort((a, b) => b["Score"] - a["Score"]);
+		list.innerHTML = "";
+		data.forEach((v, i) => {
+			list.innerHTML += `<li><div>#${i + 1}</div><div>${v["Score"]}pt</div><div>Lv:.${Game.GetLevelText(v["Level"])}</div><div>${v["Name"]}</div></li>`;
+		});
+		cb(data);
+	});
 }
 function AddFilter(Elms: Elm[]) {
 	let shots = Elms.find((e) => e.Name == "Shots").shots;
@@ -1163,8 +1177,10 @@ function AddFilter(Elms: Elm[]) {
 			Elms.find((e) => e.Name == "ButtonNodes").Enabled = false;
 			Elms.find((e) => e.Name == "Shots").shots = shots;
 			Elms.find((e) => e.Name == "Shooter").x = shooterX;
+			showHelp("about");
 		});
 	} else throw "ERROR";
+	showHelp("filter");
 }
 namespace Game {
 	export let score = 0;
@@ -1181,7 +1197,7 @@ namespace Game {
 		{ Fn: OnhitFiltersNum, Elm1: "Filters", Elm2: "NumNodes" }
 	];
 	export function Init(): void {
-		c1 = new ResizingCanvas(document.getElementById("c1"), document.documentElement, Settings.Game.Wcell * Settings.Game.Wcount, Settings.Game.Hcell * Settings.Game.Hcount);
+		c1 = new ResizingCanvas(document.getElementById("c1"), document.getElementById("canvas-parent"), Settings.Game.Wcell * Settings.Game.Wcount, Settings.Game.Hcell * Settings.Game.Hcount);
 		Elms[2] = new Shooter().Init(c1.ctx.canvas);
 		onLoad(Elms);
 	}
@@ -1219,6 +1235,23 @@ namespace Game {
 			return ((Level / Settings.NumNodes.LevelToMaxWeighting) << 0) + "+" + (Level % Settings.NumNodes.LevelToMaxWeighting) + "/" + Settings.NumNodes.LevelToMaxWeighting;
 	}
 }
+
+function showHelp(helpType: string){
+	const about=document.getElementById("help-about");
+	const filter=document.getElementById("help-filter");
+	const ranking=document.getElementById("help-ranking");
+	const aboutEn=document.getElementById("help-about-en");
+	const story=document.getElementById("help-story");
+	const helps=[about,filter,ranking,aboutEn, story];
+	const map = { about, filter, ranking };
+	helps.forEach(e=>e.classList.add("hide"));
+	if(map[helpType]){
+		map[helpType].classList.remove("hide");
+	}else{
+		throw "Unexpected helpType: "+helpType;
+	}
+}
+
 
 function LoadScript(src: string) {
 	let script = document.createElement('script');
@@ -1259,7 +1292,7 @@ namespace MyStorage {
 		LoadScript(AddingURL(id, text) + `&prefix=${encodeURIComponent("MyStorage._AddCB")}`);
 	}
 }
-namespace CSSloader {
+namespace CSSLoader {
 	export function Load(URLs: string[]) {
 		URLs.forEach((url) => {
 			var link = document.createElement('link');
@@ -1276,10 +1309,12 @@ window.addEventListener("load", () => {
 	AccessTime = DateFormat(new Date());
 	// LoadScript(MyStorage.AddingURL(3, AccessTime + " " + window.navigator.userAgent) + "&prefix=" + encodeURIComponent(""));
 	// LoadScript("https://api.ipify.org?format=jsonp&callback=AddAccessLog");
-	CSSloader.Load([
+	/*
+	CSSLoader.Load([
 		"https://fonts.googleapis.com/css?family=Lato:300,700|Noto+Sans+JP:300,700|Overpass+Mono:300|Inconsolata:400&display=swap&subset=japanese",
 		"https://fonts.googleapis.com/earlyaccess/kokoro.css"
 	]);
+	*/
 	Game.Init();
 	function Tick() {
 		Game.Tick(GetTime());

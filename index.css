@@ -1,0 +1,128 @@
+html,
+body,
+canvas,
+div {
+  padding: 0;
+  margin: 0;
+  /*overflow: hidden;*/
+}
+
+body {
+  font-family: 'Lato', 'kokoro', 'Noto Sans JP', sans-serif;
+  font-weight: 300;
+  /*
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	*/
+  background-color: #a799ef;
+  color: #130f40;
+  overflow: hidden;
+}
+
+canvas#c1 {
+  box-shadow: 0 12px 60px rgba(10, 10, 10, 0.3);
+}
+
+canvas#bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+#container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  max-height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+#help {
+  max-height: 100%;
+  text-align: start;
+  line-height: 2;
+  margin: 0;
+  padding: 1em;
+  max-height: 100vh;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+#help h2 {
+  text-shadow: none;
+  font-weight: 300;
+  font-size: 1.8em;
+  margin: 0.5em 0 0 0;
+}
+
+#help p {
+  margin: 0.25em 0;
+}
+
+#help pre {
+  white-space: pre-wrap;
+  font: inherit;
+}
+
+#canvas-parent {
+	margin: 2em 1em 0 1em;
+}
+
+#ranking {
+  text-align: start;
+  max-height: 100vh;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 1em;
+}
+
+#rankingList {
+  padding: 0;
+}
+
+#rankingList>* {
+  display: block;
+}
+
+#rankingList>*>* {
+  display: inline-block;
+}
+
+#rankingList>*>*:first-child {
+  min-width: 3em;
+}
+
+#rankingList>*>*:nth-child(2) {
+  min-width: 5em;
+}
+
+#rankingList>*>*:nth-child(3) {
+  min-width: 6em;
+}
+
+#rankingList>*>*:not(:first-child) {
+  margin-left: 1em;
+}
+
+.hide {
+  display: none;
+}
+
+.stack>* {
+  position: absolute;
+}
+
+.stack>*>* {
+  position: relative;
+}
+
+#container {
+  display: grid;
+  grid-template-columns: 1fr 48vh 1fr;
+  height: 100%;
+  width: 100%;
+}
